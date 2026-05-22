@@ -1,0 +1,637 @@
+﻿========== README.md (IL2.4) ==========
+# IL2.4: Documentacion Tecnica y Diseno de Arquitectura
+
+## Descripcion
+
+Modulo dedicado a las mejores practicas para documentar sistemas de agentes LLM y disenar arquitecturas escalables. Se cubren patrones de diseno, documentacion tecnica y estrategias de implementacion para proyectos basados en agentes inteligentes.
+
+## Objetivos de Aprendizaje
+
+- Comprender patrones de arquitectura para sistemas de agentes
+- Crear documentacion tecnica efectiva para proyectos de IA
+- Disenar arquitecturas escalables y mantenibles
+- Aplicar buenas practicas de desarrollo en proyectos de agentes
+
+## Archivos del Modulo
+
+| Archivo | Descripcion |
+|---------|-------------|
+| [1-architecture_example.py](1-architecture_example.py) | Ejemplo practico de documentacion de arquitectura: implementa un agente simple (`MainAgent`) con una herramienta de calculo, mostrando como documentar componentes y flujos de datos. |
+| [2-best_practices.py](2-best_practices.py) | Lista de buenas practicas para proyectos de agentes: nombres claros, docstrings, separacion de responsabilidades, control de versiones y ejemplos de uso. |
+| [presentacion.md](presentacion.md) | Material de presentacion con 10 slides que cubren documentacion tecnica, patrones de arquitectura, testing, deployment y gestion del ciclo de vida. |
+
+## Material de Presentacion
+
+Para ver las diapositivas completas del modulo, consultar [presentacion.md](presentacion.md).
+
+
+========== presentacion.md (IL2.4) ==========
+# PresentaciÃ³n IL2.4 - DocumentaciÃ³n TÃ©cnica y DiseÃ±o de Arquitectura
+
+## Slide 1: TÃ­tulo y Objetivos
+**TÃ­tulo:** IL2.4 - DocumentaciÃ³n TÃ©cnica y DiseÃ±o de Arquitectura  
+**SubtÃ­tulo:** Mejores PrÃ¡cticas para Sistemas de Agentes Escalables
+
+**Objetivos:**
+- Comprender patrones de arquitectura para sistemas de agentes
+- Crear documentaciÃ³n tÃ©cnica efectiva
+- DiseÃ±ar arquitecturas escalables y mantenibles
+- Implementar patrones de diseÃ±o para agentes
+- Gestionar la evoluciÃ³n y mantenimiento de sistemas
+
+---
+
+## Slide 2: Importancia de la DocumentaciÃ³n
+**TÃ­tulo:** Por quÃ© Documentar Sistemas de Agentes
+
+**DesafÃ­os sin documentaciÃ³n:**
+- Sistemas complejos difÃ­ciles de mantener
+- Conocimiento concentrado en desarrolladores individuales
+- Dificultad para onboarding de nuevos miembros
+- Problemas de escalabilidad y evoluciÃ³n
+
+**Beneficios de buena documentaciÃ³n:**
+- **Mantenibilidad:** CÃ³digo claro y modificable
+- **Escalabilidad:** Facilita crecimiento del equipo
+- **Confiabilidad:** Reduce errores y malentendidos
+- **ReutilizaciÃ³n:** Componentes documentados son reutilizables
+
+---
+
+## Slide 3: Arquitectura Simple - Ejemplo PrÃ¡ctico
+**TÃ­tulo:** Script 1 - Documentando Arquitectura BÃ¡sica
+
+**Arquitectura de ejemplo:**
+```python
+class MainAgent:
+    def __init__(self, tool):
+        self.tool = tool
+
+    def answer(self, question):
+        if "suma" in question:
+            return self.tool("2+2")
+        return "No sÃ© la respuesta."
+
+def calculator(expression):
+    return str(eval(expression))
+```
+
+**DocumentaciÃ³n de componentes:**
+- **MainAgent:** Gestiona la interacciÃ³n principal
+- **calculator:** Herramienta de cÃ¡lculo especializada
+- **Flujo:** Usuario â†’ MainAgent â†’ calculator â†’ respuesta
+
+**Elementos clave:**
+- SeparaciÃ³n clara de responsabilidades
+- Interfaz simple y documentada
+- Flujo de datos explÃ­cito
+
+---
+
+## Slide 4: Mejores PrÃ¡cticas de Desarrollo
+**TÃ­tulo:** Script 2 - EstÃ¡ndares de Calidad
+
+**Principios fundamentales:**
+1. **Nombres claros:** Clases y funciones autodescriptivas
+2. **Docstrings:** Documentar cada funciÃ³n con propÃ³sito y parÃ¡metros
+3. **SeparaciÃ³n de responsabilidades:** LÃ³gica del agente vs. herramientas
+4. **Control de versiones:** Git para tracking de cambios
+5. **Ejemplos de uso:** CÃ³digo ejecutable en archivo principal
+
+**Estructura recomendada:**
+```
+proyecto_agentes/
+â”œâ”€â”€ agents/           # LÃ³gica de agentes
+â”œâ”€â”€ tools/           # Herramientas y utilidades
+â”œâ”€â”€ config/          # Configuraciones
+â”œâ”€â”€ docs/            # DocumentaciÃ³n
+â”œâ”€â”€ tests/           # Pruebas automatizadas
+â””â”€â”€ README.md        # DocumentaciÃ³n principal
+```
+
+---
+
+## Slide 5: Patrones de Arquitectura
+**TÃ­tulo:** DiseÃ±os Escalables para Sistemas de Agentes
+
+**1. Arquitectura en Capas:**
+- **PresentaciÃ³n:** Interfaces y APIs
+- **LÃ³gica de Negocio:** Agentes y orquestaciÃ³n
+- **Datos:** Memoria y persistencia
+- **Servicios:** Herramientas externas
+
+**2. Microservicios de Agentes:**
+- Cada agente como servicio independiente
+- ComunicaciÃ³n via APIs REST/GraphQL
+- Escalabilidad horizontal
+- Despliegue independiente
+
+**3. Event-Driven Architecture:**
+- Agentes reaccionan a eventos
+- Desacoplamiento temporal
+- Escalabilidad asÃ­ncrona
+- Resilencia ante fallos
+
+---
+
+## Slide 6: DocumentaciÃ³n TÃ©cnica Efectiva
+**TÃ­tulo:** Elementos de DocumentaciÃ³n Completa
+
+**Tipos de documentaciÃ³n:**
+
+**1. DocumentaciÃ³n de Arquitectura:**
+- Diagramas de componentes
+- Flujos de datos
+- Patrones de comunicaciÃ³n
+- Decisiones de diseÃ±o
+
+**2. DocumentaciÃ³n de APIs:**
+- Endpoints disponibles
+- ParÃ¡metros y respuestas
+- Ejemplos de uso
+- Rate limits y autenticaciÃ³n
+
+**3. DocumentaciÃ³n de CÃ³digo:**
+- Docstrings en funciones
+- Comentarios en lÃ³gica compleja
+- README con setup y uso
+- Changelog con versiones
+
+**Templates recomendados:**
+- README.md estÃ¡ndar
+- API documentation con OpenAPI
+- Architecture Decision Records (ADRs)
+
+---
+
+## Slide 7: Testing y Calidad
+**TÃ­tulo:** Estrategias de Testing para Agentes
+
+**Niveles de testing:**
+
+**1. Unit Tests:**
+```python
+def test_agent_calculator():
+    agent = MainAgent(calculator)
+    result = agent.answer("Â¿CuÃ¡nto es la suma de 2+2?")
+    assert "4" in result
+```
+
+**2. Integration Tests:**
+- Testing de agentes con herramientas reales
+- VerificaciÃ³n de APIs externas
+- Testing de workflows completos
+
+**3. End-to-End Tests:**
+- Scenarios completos de usuario
+- Performance testing
+- Load testing para escalabilidad
+
+**Herramientas recomendadas:**
+- pytest para unit testing
+- Mock para simular dependencias
+- CI/CD para testing automatizado
+
+---
+
+## Slide 8: Deployment y Operations
+**TÃ­tulo:** Llevando Agentes a ProducciÃ³n
+
+**Patrones de deployment:**
+
+**1. ContainerizaciÃ³n:**
+```dockerfile
+FROM python:3.9
+COPY . /app
+WORKDIR /app
+RUN pip install -r requirements.txt
+CMD ["python", "main.py"]
+```
+
+**2. OrquestaciÃ³n con Kubernetes:**
+- Pods para agentes individuales
+- Services para comunicaciÃ³n
+- ConfigMaps para configuraciÃ³n
+- Secrets para API keys
+
+**3. Monitoring y Observabilidad:**
+- Logs estructurados
+- MÃ©tricas de performance
+- Health checks
+- Alerting automÃ¡tico
+
+---
+
+## Slide 9: EvoluciÃ³n y Mantenimiento
+**TÃ­tulo:** GestiÃ³n del Ciclo de Vida
+
+**Control de versiones:**
+- Semantic versioning (v1.2.3)
+- Branch strategy (feature/main/release)
+- Tag releases para deployments
+- Rollback procedures
+
+**GestiÃ³n de cambios:**
+- Architecture Decision Records
+- Change logs detallados
+- Backward compatibility
+- Migration guides
+
+**Mantenimiento continuo:**
+- Dependency updates
+- Security patches
+- Performance optimization
+- Feature evolution
+
+---
+
+## Slide 10: Resumen y PrÃ³ximos Pasos
+**TÃ­tulo:** IntegraciÃ³n con Proyecto Final RA2
+
+**Conceptos clave aprendidos:**
+1. **DocumentaciÃ³n como cÃ³digo:** Mantener docs actualizadas
+2. **Arquitectura escalable:** Patrones para crecimiento
+3. **Testing integral:** Calidad desde desarrollo
+4. **Operations preparadas:** Deployment y monitoring
+
+**IntegraciÃ³n en proyecto RA2:**
+- **IL2.1:** Agentes documentados con APIs claras
+- **IL2.2:** Memoria y herramientas con arquitectura definida
+- **IL2.3:** PlanificaciÃ³n con documentaciÃ³n de workflows
+- **IL2.4:** Sistema completo con documentaciÃ³n tÃ©cnica
+
+**Deliverables finales:**
+- CÃ³digo limpio y documentado
+- README completo con setup
+- Diagramas de arquitectura
+- GuÃ­a de deployment
+- Testing automatizado
+
+**PreparaciÃ³n para RA3:**
+- Base sÃ³lida para observabilidad
+- Fundamentos de seguridad
+- Patrones de escalabilidad
+- DocumentaciÃ³n para auditorÃ­a
+
+========== 1-architecture_example.py ==========
+"""
+IL2.4: Ejemplo de Arquitectura Limpia para Agentes de IA
+=========================================================
+Demuestra separacion clara de capas (presentacion, aplicacion, dominio,
+infraestructura) con un agente que enruta herramientas de forma segura
+sin usar eval().
+
+Ejecutar: python 1-architecture_example.py
+"""
+
+import ast
+import re
+from typing import Callable, Dict, Optional
+from dataclasses import dataclass
+
+
+# =====================================================
+# CAPA DE DOMINIO - Logica de negocio pura
+# =====================================================
+
+@dataclass
+class Respuesta:
+    """Modelo de dominio para la respuesta del agente."""
+    contenido: str
+    herramienta_usada: Optional[str] = None
+    exitoso: bool = True
+
+
+# --- Herramientas del dominio ---
+
+def calculadora(expresion: str) -> str:
+    """Evalua expresiones matematicas de forma segura usando AST."""
+    try:
+        arbol = ast.parse(expresion.strip(), mode="eval")
+        for nodo in ast.walk(arbol):
+            if isinstance(nodo, (ast.Expression, ast.BinOp, ast.UnaryOp,
+                                 ast.Constant, ast.Add, ast.Sub, ast.Mult,
+                                 ast.Div, ast.Pow, ast.Mod, ast.USub)):
+                continue
+            return f"Error: operacion no permitida ({type(nodo).__name__})"
+        resultado = eval(compile(arbol, "<entrada>", "eval"))
+        return f"Resultado: {resultado}"
+    except (SyntaxError, ZeroDivisionError) as e:
+        return f"Error de calculo: {e}"
+
+
+def buscador(consulta: str) -> str:
+    """Simula una busqueda en base de conocimiento."""
+    conocimiento = {
+        "python": "Python es un lenguaje de programacion de alto nivel.",
+        "ia": "La inteligencia artificial busca simular capacidades cognitivas.",
+        "llm": "Los LLM son modelos de lenguaje entrenados con grandes corpus de texto.",
+        "langchain": "LangChain es un framework para construir aplicaciones con LLMs.",
+    }
+    consulta_lower = consulta.lower()
+    for clave, valor in conocimiento.items():
+        if clave in consulta_lower:
+            return valor
+    return "No se encontro informacion sobre esa consulta."
+
+
+def traductor(texto: str) -> str:
+    """Simula traduccion basica espanol-ingles."""
+    traducciones = {
+        "hola": "hello", "mundo": "world", "agente": "agent",
+        "inteligencia artificial": "artificial intelligence",
+    }
+    texto_lower = texto.lower()
+    for esp, eng in traducciones.items():
+        texto_lower = texto_lower.replace(esp, eng)
+    return f"Traduccion: {texto_lower}"
+
+
+# =====================================================
+# CAPA DE INFRAESTRUCTURA - Registro de herramientas
+# =====================================================
+
+class RegistroHerramientas:
+    """Registra y gestiona las herramientas disponibles para el agente."""
+
+    def __init__(self):
+        self._herramientas: Dict[str, Callable] = {}
+        self._descripciones: Dict[str, str] = {}
+
+    def registrar(self, nombre: str, funcion: Callable, descripcion: str):
+        self._herramientas[nombre] = funcion
+        self._descripciones[nombre] = descripcion
+
+    def obtener(self, nombre: str) -> Optional[Callable]:
+        return self._herramientas.get(nombre)
+
+    def listar(self) -> Dict[str, str]:
+        return dict(self._descripciones)
+
+
+# =====================================================
+# CAPA DE APLICACION - Orquestacion del agente
+# =====================================================
+
+class AgenteOrquestador:
+    """Orquesta la logica del agente: clasifica intencion y enruta a herramientas."""
+
+    # Mapeo de palabras clave a herramientas
+    REGLAS_ENRUTAMIENTO = {
+        "calculadora": ["suma", "resta", "calcula", "cuanto es", "multiplica", "+", "-", "*", "/"],
+        "buscador": ["que es", "busca", "explica", "define", "informacion"],
+        "traductor": ["traduce", "traduccion", "en ingles", "translate"],
+    }
+
+    def __init__(self, registro: RegistroHerramientas):
+        self.registro = registro
+
+    def clasificar_intencion(self, mensaje: str) -> Optional[str]:
+        """Determina que herramienta usar segun el contenido del mensaje."""
+        mensaje_lower = mensaje.lower()
+        for herramienta, palabras_clave in self.REGLAS_ENRUTAMIENTO.items():
+            if any(clave in mensaje_lower for clave in palabras_clave):
+                return herramienta
+        return None
+
+    def _extraer_entrada(self, mensaje: str, herramienta: str) -> str:
+        """Extrae la entrada relevante del mensaje segun la herramienta."""
+        if herramienta == "calculadora":
+            # Extraer la expresion matematica del mensaje
+            expresion = re.findall(r"[\d\s\+\-\*\/\(\)\.\^]+", mensaje)
+            if expresion:
+                # Tomar la coincidencia mas larga que contenga digitos
+                candidatas = [e.strip() for e in expresion if re.search(r"\d", e)]
+                if candidatas:
+                    return max(candidatas, key=len)
+            return mensaje
+        return mensaje
+
+    def procesar(self, mensaje: str) -> Respuesta:
+        """Procesa un mensaje: clasifica, enruta y ejecuta."""
+        nombre_herramienta = self.clasificar_intencion(mensaje)
+
+        if nombre_herramienta is None:
+            return Respuesta(
+                contenido="No tengo una herramienta adecuada para esa consulta.",
+                exitoso=False,
+            )
+
+        funcion = self.registro.obtener(nombre_herramienta)
+        if funcion is None:
+            return Respuesta(
+                contenido=f"Herramienta '{nombre_herramienta}' no disponible.",
+                exitoso=False,
+            )
+
+        entrada = self._extraer_entrada(mensaje, nombre_herramienta)
+        resultado = funcion(entrada)
+        return Respuesta(
+            contenido=resultado,
+            herramienta_usada=nombre_herramienta,
+            exitoso=True,
+        )
+
+
+# =====================================================
+# CAPA DE PRESENTACION - Interfaz de usuario
+# =====================================================
+
+def mostrar_respuesta(mensaje: str, respuesta: Respuesta):
+    """Muestra la respuesta formateada al usuario."""
+    estado = "OK" if respuesta.exitoso else "SIN HERRAMIENTA"
+    herramienta = respuesta.herramienta_usada or "ninguna"
+    print(f"  [{estado}] Herramienta: {herramienta}")
+    print(f"  Entrada:   {mensaje}")
+    print(f"  Respuesta: {respuesta.contenido}")
+    print()
+
+
+# --- Ejecucion de demostracion ---
+
+if __name__ == "__main__":
+    # Configurar infraestructura
+    registro = RegistroHerramientas()
+    registro.registrar("calculadora", calculadora, "Evalua expresiones matematicas")
+    registro.registrar("buscador", buscador, "Busca en base de conocimiento")
+    registro.registrar("traductor", traductor, "Traduce texto al ingles")
+
+    # Crear agente
+    agente = AgenteOrquestador(registro)
+
+    print("=" * 60)
+    print("DEMOSTRACION: Arquitectura Limpia para Agentes de IA")
+    print("=" * 60)
+
+    # Mostrar herramientas disponibles
+    print("\nHerramientas registradas:")
+    for nombre, desc in registro.listar().items():
+        print(f"  - {nombre}: {desc}")
+    print()
+
+    # Procesar mensajes de prueba
+    mensajes = [
+        "Calcula cuanto es 15 * 7 + 3",
+        "Que es un LLM",
+        "Traduce inteligencia artificial en ingles",
+        "Cual es el clima hoy",  # sin herramienta disponible
+        "Busca informacion sobre Python",
+    ]
+
+    for msg in mensajes:
+        respuesta = agente.procesar(msg)
+        mostrar_respuesta(msg, respuesta)
+
+
+========== 2-best_practices.py ==========
+"""
+IL2.4: Buenas Practicas para Proyectos de Agentes de IA
+========================================================
+Demuestra patrones concretos: manejo de errores, configuracion con
+variables de entorno, logica de reintento y validacion de entrada.
+
+Ejecutar: python 2-best_practices.py
+"""
+
+import os
+import time
+import random
+from dataclasses import dataclass
+from typing import Optional
+
+
+# --- Configuracion centralizada con variables de entorno ---
+
+@dataclass
+class Configuracion:
+    """Carga y valida la configuracion desde variables de entorno."""
+    api_base_url: str
+    api_key: str
+    modelo: str
+    temperatura: float
+    max_reintentos: int
+
+    @classmethod
+    def desde_entorno(cls) -> "Configuracion":
+        """Crea configuracion desde variables de entorno con valores por defecto."""
+        api_key = os.getenv("API_KEY", "demo-key-12345")
+        if not api_key:
+            raise ValueError("La variable API_KEY es obligatoria")
+        return cls(
+            api_base_url=os.getenv("API_BASE_URL", "https://api.example.com/v1"),
+            api_key=api_key,
+            modelo=os.getenv("MODELO_LLM", "gpt-4o-mini"),
+            temperatura=float(os.getenv("TEMPERATURA", "0.7")),
+            max_reintentos=int(os.getenv("MAX_REINTENTOS", "3")),
+        )
+
+
+# --- Validacion de entrada ---
+
+def validar_mensaje(mensaje: str, largo_minimo: int = 1, largo_maximo: int = 2000) -> str:
+    """Valida y limpia el mensaje de entrada del usuario."""
+    if not isinstance(mensaje, str):
+        raise TypeError(f"Se esperaba str, se recibio {type(mensaje).__name__}")
+    mensaje = mensaje.strip()
+    if len(mensaje) < largo_minimo:
+        raise ValueError(f"El mensaje debe tener al menos {largo_minimo} caracter(es)")
+    if len(mensaje) > largo_maximo:
+        mensaje = mensaje[:largo_maximo]
+    return mensaje
+
+
+# --- Logica de reintento con backoff exponencial ---
+
+class ErrorAPI(Exception):
+    """Error personalizado para fallos de API."""
+    def __init__(self, mensaje: str, codigo: int = 500):
+        super().__init__(mensaje)
+        self.codigo = codigo
+
+
+def llamar_con_reintento(funcion, max_reintentos: int = 3,
+                         base_espera: float = 0.1) -> str:
+    """Ejecuta una funcion con reintentos y backoff exponencial."""
+    ultimo_error = None
+    for intento in range(1, max_reintentos + 1):
+        try:
+            return funcion()
+        except ErrorAPI as e:
+            ultimo_error = e
+            if intento < max_reintentos:
+                espera = base_espera * (2 ** (intento - 1))
+                print(f"  [Reintento {intento}/{max_reintentos}] "
+                      f"Error: {e} - Esperando {espera:.2f}s")
+                time.sleep(espera)
+    raise ErrorAPI(f"Fallo tras {max_reintentos} reintentos: {ultimo_error}")
+
+
+# --- Simulacion de llamada a API con errores aleatorios ---
+
+def simular_llamada_api(mensaje: str, config: Configuracion) -> str:
+    """Simula una llamada a API que puede fallar aleatoriamente."""
+    def _llamada():
+        if random.random() < 0.4:  # 40% probabilidad de fallo
+            raise ErrorAPI("Timeout del servidor", codigo=503)
+        return f"[{config.modelo}] Respuesta para: {mensaje}"
+
+    return llamar_con_reintento(_llamada, max_reintentos=config.max_reintentos)
+
+
+# --- Manejo de errores estructurado ---
+
+@dataclass
+class ResultadoOperacion:
+    """Encapsula el resultado de una operacion con manejo de errores."""
+    exitoso: bool
+    contenido: Optional[str] = None
+    error: Optional[str] = None
+
+
+def procesar_mensaje_seguro(mensaje: str, config: Configuracion) -> ResultadoOperacion:
+    """Procesa un mensaje con manejo completo de errores."""
+    try:
+        mensaje_limpio = validar_mensaje(mensaje)
+        respuesta = simular_llamada_api(mensaje_limpio, config)
+        return ResultadoOperacion(exitoso=True, contenido=respuesta)
+    except ValueError as e:
+        return ResultadoOperacion(exitoso=False, error=f"Validacion: {e}")
+    except TypeError as e:
+        return ResultadoOperacion(exitoso=False, error=f"Tipo invalido: {e}")
+    except ErrorAPI as e:
+        return ResultadoOperacion(exitoso=False, error=f"API: {e}")
+
+
+# --- Ejecucion de demostracion ---
+
+if __name__ == "__main__":
+    print("=" * 60)
+    print("DEMOSTRACION: Buenas Practicas para Agentes de IA")
+    print("=" * 60)
+
+    # Cargar configuracion
+    config = Configuracion.desde_entorno()
+    print(f"\nConfiguracion cargada:")
+    print(f"  Modelo: {config.modelo}")
+    print(f"  URL base: {config.api_base_url}")
+    print(f"  Reintentos: {config.max_reintentos}")
+
+    # Pruebas con diferentes entradas
+    print("\n--- Procesamiento de Mensajes ---")
+    casos_prueba = [
+        "Explica que es un agente de IA",
+        "",          # vacio -> error de validacion
+        "Consulta normal sobre LLMs",
+        "   ",       # solo espacios -> error de validacion
+    ]
+
+    for caso in casos_prueba:
+        print(f"\n  Entrada: {caso!r}")
+        resultado = procesar_mensaje_seguro(caso, config)
+        if resultado.exitoso:
+            print(f"  Resultado: {resultado.contenido}")
+        else:
+            print(f"  Error: {resultado.error}")
+
+
+

@@ -1,0 +1,14 @@
+# Entorno virtual
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Variables de entorno (Secretos)
+.env
+
+# Editor
+.vscode/
+
+# Archivos de datos locales (Historial del agente)
+memoria/historial_reportes.json

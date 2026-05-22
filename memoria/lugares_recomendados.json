@@ -1,0 +1,191 @@
+{
+  "lugares": [
+    {
+      "nombre": "Parque Costanera",
+      "descripcion": "Caminata con vista al Seno de Reloncaví, ideal para trotar o pasear en familia",
+      "categoria": "aire_libre",
+      "rango_wmo": [0, 3],
+      "temp_minima": 5,
+      "lluvia_maxima": 0.5,
+      "temporada": ["todo_el_año"],
+      "horarios": ["mañana", "tarde"],
+      "enlace": null
+    },
+    {
+      "nombre": "Costanera de Puerto Montt",
+      "descripcion": "Extenso paseo peatonal a orillas del mar, perfecto para caminatas y fotografía",
+      "categoria": "aire_libre",
+      "rango_wmo": [0, 3],
+      "temp_minima": 5,
+      "lluvia_maxima": 0.5,
+      "temporada": ["todo_el_año"],
+      "horarios": ["mañana", "tarde", "noche"],
+      "enlace": null
+    },
+    {
+      "nombre": "Playa Pelluco",
+      "descripcion": "Balneario natural de aguas tranquilas, ideal para días soleados de verano",
+      "categoria": "aire_libre",
+      "rango_wmo": [0, 1],
+      "temp_minima": 16,
+      "lluvia_maxima": 0,
+      "temporada": ["diciembre", "enero", "febrero", "marzo"],
+      "horarios": ["mañana", "tarde"],
+      "enlace": null
+    },
+    {
+      "nombre": "Mirador de la Virgen",
+      "descripcion": "Mirador con vista panorámica de la ciudad, el volcán Calbuco y el canal de Chacao",
+      "categoria": "aire_libre",
+      "rango_wmo": [0, 2],
+      "temp_minima": 8,
+      "lluvia_maxima": 0.3,
+      "temporada": ["todo_el_año"],
+      "horarios": ["mañana", "tarde"],
+      "enlace": null
+    },
+    {
+      "nombre": "Sendero de Chile (Tramo Pto Montt)",
+      "descripcion": "Sendero urbano señalizado, conecta distintos miradores naturales de la ciudad",
+      "categoria": "aire_libre",
+      "rango_wmo": [0, 2],
+      "temp_minima": 8,
+      "lluvia_maxima": 0.3,
+      "temporada": ["todo_el_año"],
+      "horarios": ["mañana", "tarde"],
+      "enlace": null
+    },
+    {
+      "nombre": "Mall Costanera",
+      "descripcion": "Centro comercial con tiendas retail, cine, patio de comidas y estacionamiento subterráneo",
+      "categoria": "bajo_techo",
+      "rango_wmo": [0, 99],
+      "temp_minima": 0,
+      "lluvia_maxima": 999,
+      "temporada": ["todo_el_año"],
+      "horarios": ["mañana", "tarde", "noche"],
+      "enlace": null
+    },
+    {
+      "nombre": "Mercado Regional de Puerto Montt",
+      "descripcion": "Mercado típico cubierto con artesanías, productos del mar y gastronomía local",
+      "categoria": "bajo_techo",
+      "rango_wmo": [0, 99],
+      "temp_minima": 0,
+      "lluvia_maxima": 999,
+      "temporada": ["todo_el_año"],
+      "horarios": ["mañana", "tarde"],
+      "enlace": null
+    },
+    {
+      "nombre": "Angelmó",
+      "descripcion": "Tradicional feria artesanal y gastronómica parcialmente techada, curantos y mariscos",
+      "categoria": "mixto",
+      "rango_wmo": [0, 3],
+      "temp_minima": 5,
+      "lluvia_maxima": 2,
+      "temporada": ["todo_el_año"],
+      "horarios": ["mañana", "tarde"],
+      "enlace": null
+    },
+    {
+      "nombre": "Casa del Arte Diego Rivera",
+      "descripcion": "Centro cultural con exposiciones de arte contemporáneo, teatro y talleres",
+      "categoria": "bajo_techo",
+      "rango_wmo": [0, 99],
+      "temp_minima": 0,
+      "lluvia_maxima": 999,
+      "temporada": ["todo_el_año"],
+      "horarios": ["mañana", "tarde"],
+      "enlace": null
+    },
+    {
+      "nombre": "Catedral de Puerto Montt",
+      "descripcion": "Imponente catedral de arquitectura moderna, visita turística y cultural",
+      "categoria": "bajo_techo",
+      "rango_wmo": [0, 99],
+      "temp_minima": 0,
+      "lluvia_maxima": 999,
+      "temporada": ["todo_el_año"],
+      "horarios": ["mañana", "tarde"],
+      "enlace": null
+    },
+    {
+      "nombre": "Museo Juan Pablo II",
+      "descripcion": "Museo de historia regional con exhibiciones sobre la colonización de Llanquihue",
+      "categoria": "bajo_techo",
+      "rango_wmo": [0, 99],
+      "temp_minima": 0,
+      "lluvia_maxima": 999,
+      "temporada": ["todo_el_año"],
+      "horarios": ["mañana", "tarde"],
+      "enlace": null
+    },
+    {
+      "nombre": "Casino de Puerto Montt",
+      "descripcion": "Centro de entretención nocturna con juegos, restaurante y bar",
+      "categoria": "bajo_techo",
+      "rango_wmo": [0, 99],
+      "temp_minima": 0,
+      "lluvia_maxima": 999,
+      "temporada": ["todo_el_año"],
+      "horarios": ["tarde", "noche"],
+      "enlace": null
+    },
+    {
+      "nombre": "Cafeterías del Centro Histórico",
+      "descripcion": "Variedad de cafeterías y pastelerías alrededor de la Plaza de Armas",
+      "categoria": "bajo_techo",
+      "rango_wmo": [0, 99],
+      "temp_minima": 0,
+      "lluvia_maxima": 999,
+      "temporada": ["todo_el_año"],
+      "horarios": ["mañana", "tarde"],
+      "enlace": null
+    },
+    {
+      "nombre": "Teatro Diego Rivera",
+      "descripcion": "Teatro municipal con programación de obras, conciertos y eventos culturales",
+      "categoria": "bajo_techo",
+      "rango_wmo": [0, 99],
+      "temp_minima": 0,
+      "lluvia_maxima": 999,
+      "temporada": ["todo_el_año"],
+      "horarios": ["tarde", "noche"],
+      "enlace": null
+    },
+    {
+      "nombre": "Paseo Museo Histórico",
+      "descripcion": "Recorrido por edificios patrimoniales del casco histórico de la ciudad",
+      "categoria": "aire_libre",
+      "rango_wmo": [0, 3],
+      "temp_minima": 5,
+      "lluvia_maxima": 0.5,
+      "temporada": ["todo_el_año"],
+      "horarios": ["mañana", "tarde"],
+      "enlace": null
+    },
+    {
+      "nombre": "Isla Tenglo",
+      "descripcion": "Paseo en lancha desde la costanera, naturaleza y senderos, vista única de la ciudad",
+      "categoria": "aire_libre",
+      "rango_wmo": [0, 2],
+      "temp_minima": 12,
+      "lluvia_maxima": 0.3,
+      "temporada": ["noviembre", "diciembre", "enero", "febrero", "marzo"],
+      "horarios": ["mañana", "tarde"],
+      "enlace": null
+    },
+    {
+      "nombre": "Biblioteca Regional",
+      "descripcion": "Espacio de lectura y estudio, con salas multimedia y archivo histórico",
+      "categoria": "bajo_techo",
+      "rango_wmo": [0, 99],
+      "temp_minima": 0,
+      "lluvia_maxima": 999,
+      "temporada": ["todo_el_año"],
+      "horarios": ["mañana", "tarde"],
+      "enlace": null
+    }
+  ]
+}

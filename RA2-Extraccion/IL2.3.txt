@@ -1,0 +1,927 @@
+﻿========== README.md (IL2.3) ==========
+# IL2.3: PlanificaciÃ³n y OrquestaciÃ³n
+
+## ðŸ“‹ DescripciÃ³n General
+
+En este mÃ³dulo exploramos estrategias avanzadas de planificaciÃ³n y orquestaciÃ³n para agentes LLM, incluyendo planificaciÃ³n jerÃ¡rquica, coordinaciÃ³n multi-agente y gestiÃ³n de flujos de trabajo complejos.
+
+## ðŸŽ¯ Objetivos de Aprendizaje
+
+- Comprender diferentes estrategias de planificaciÃ³n para agentes
+- Implementar planificaciÃ³n jerÃ¡rquica y reactiva
+- DiseÃ±ar sistemas de orquestaciÃ³n multi-agente
+- Gestionar flujos de trabajo complejos y dependencias
+- Optimizar la coordinaciÃ³n entre agentes especializados
+
+## ðŸ“š Contenido del MÃ³dulo
+
+### 1. Estrategias de PlanificaciÃ³n
+- [1-planning-strategies.py](1-planning-strategies.py) - Tipos de planificaciÃ³n y algoritmos
+- [2-hierarchical-planning.py](2-hierarchical-planning.py) - PlanificaciÃ³n jerÃ¡rquica
+- [3-reactive-planning.py](3-reactive-planning.py) - PlanificaciÃ³n reactiva
+- [4-goal-oriented-planning.py](4-goal-oriented-planning.py) - PlanificaciÃ³n orientada a objetivos
+
+### 2. OrquestaciÃ³n de Agentes
+- [5-agent-orchestration.py](5-agent-orchestration.py) - CoordinaciÃ³n de agentes
+- [6-workflow-management.py](6-workflow-management.py) - GestiÃ³n de flujos de trabajo
+- [7-task-decomposition.py](7-task-decomposition.py) - DescomposiciÃ³n de tareas
+- [8-resource-allocation.py](8-resource-allocation.py) - AsignaciÃ³n de recursos
+
+### 3. CoordinaciÃ³n Avanzada
+- [9-multi-agent-coordination.py](9-multi-agent-coordination.py) - CoordinaciÃ³n multi-agente
+- [10-conflict-resolution.py](10-conflict-resolution.py) - ResoluciÃ³n de conflictos
+- [11-negotiation-strategies.py](11-negotiation-strategies.py) - Estrategias de negociaciÃ³n
+- [12-emergence-behaviors.py](12-emergence-behaviors.py) - Comportamientos emergentes
+
+## ðŸ› ï¸ Recursos Adicionales
+
+- [planning-patterns.md](planning-patterns.md) - Patrones de planificaciÃ³n
+- [orchestration-guide.md](orchestration-guide.md) - GuÃ­a de orquestaciÃ³n
+- [coordination-strategies.md](coordination-strategies.md) - Estrategias de coordinaciÃ³n
+
+## ðŸ“ EvaluaciÃ³n
+
+- **Ejercicios PrÃ¡cticos**: ImplementaciÃ³n de sistemas de planificaciÃ³n
+- **Proyecto**: Sistema multi-agente con orquestaciÃ³n compleja
+- **Quiz**: Conceptos de planificaciÃ³n y coordinaciÃ³n
+
+## ðŸ”— Enlaces Ãštiles
+
+- [LangChain Planning](https://python.langchain.com/docs/use_cases/autonomous_agents/)
+- [CrewAI Orchestration](https://docs.crewai.com/)
+- [Multi-Agent Systems](https://en.wikipedia.org/wiki/Multi-agent_system) 
+
+========== presentacion.md (IL2.3) ==========
+# PresentaciÃ³n IL2.3 - PlanificaciÃ³n y OrquestaciÃ³n
+
+## Slide 1: TÃ­tulo y Objetivos
+**TÃ­tulo:** IL2.3 - PlanificaciÃ³n y OrquestaciÃ³n  
+**SubtÃ­tulo:** Estrategias Avanzadas de PlanificaciÃ³n y CoordinaciÃ³n Multi-Agente
+
+**Objetivos:**
+- Comprender diferentes estrategias de planificaciÃ³n para agentes
+- Implementar planificaciÃ³n jerÃ¡rquica, reactiva y orientada a objetivos
+- DiseÃ±ar sistemas de orquestaciÃ³n multi-agente
+- Gestionar flujos de trabajo complejos y dependencias
+- Optimizar la coordinaciÃ³n entre agentes especializados
+
+---
+
+## Slide 2: Â¿Por quÃ© PlanificaciÃ³n en Agentes?
+**TÃ­tulo:** La Necesidad de PlanificaciÃ³n en Sistemas de Agentes
+
+**Problemas sin planificaciÃ³n:**
+- Agentes reactivos que solo responden a estÃ­mulos inmediatos
+- Falta de coordinaciÃ³n entre mÃºltiples agentes
+- Ineficiencia en la ejecuciÃ³n de tareas complejas
+- Dificultad para manejar dependencias entre tareas
+
+**Beneficios de la planificaciÃ³n:**
+- **Eficiencia:** Optimizar secuencia de acciones
+- **CoordinaciÃ³n:** Sincronizar mÃºltiples agentes
+- **PrevisiÃ³n:** Anticipar problemas y conflictos
+- **Escalabilidad:** Manejar sistemas complejos
+
+**Diferencia clave:**
+```
+Sin planificaciÃ³n: EstÃ­mulo â†’ Respuesta inmediata
+Con planificaciÃ³n: Objetivo â†’ Plan â†’ EjecuciÃ³n secuencial â†’ Resultado
+```
+
+**Ejemplo prÃ¡ctico:**
+- **Sin plan:** "Buscar informaciÃ³n sobre IA" â†’ respuesta inmediata limitada
+- **Con plan:** Definir objetivo â†’ Identificar fuentes â†’ Recopilar datos â†’ Analizar â†’ Sintetizar â†’ Presentar resultados
+
+---
+
+## Slide 3: Tipos de Estrategias de PlanificaciÃ³n
+**TÃ­tulo:** TaxonomÃ­a de Estrategias de PlanificaciÃ³n
+
+**1. PlanificaciÃ³n JerÃ¡rquica (Hierarchical):**
+- Descompone objetivos complejos en sub-objetivos
+- MÃºltiples niveles de abstracciÃ³n (alto, medio, bajo)
+- **Ventaja:** Estructura clara y escalable
+- **Desventaja:** Puede ser rÃ­gida
+
+**2. PlanificaciÃ³n Reactiva (Reactive):**
+- Responde dinÃ¡micamente a cambios del entorno
+- Basada en reglas "condiciÃ³n â†’ acciÃ³n"
+- **Ventaja:** Flexible y adaptable
+- **Desventaja:** Puede ser impredecible
+
+**3. PlanificaciÃ³n Orientada a Objetivos (Goal-Oriented):**
+- PlanificaciÃ³n hacia atrÃ¡s desde el objetivo final
+- Considera precondiciones y efectos de cada acciÃ³n
+- **Ventaja:** LÃ³gica clara y optimizada
+- **Desventaja:** Complejidad computacional
+
+**4. PlanificaciÃ³n Continua (Continuous):**
+- Re-planificaciÃ³n constante segÃºn resultados
+- AdaptaciÃ³n en tiempo real
+- **Ventaja:** MÃ¡xima adaptabilidad
+- **Desventaja:** Alto costo computacional
+
+---
+
+## Slide 4: Componentes de un Sistema de PlanificaciÃ³n
+**TÃ­tulo:** Elementos Fundamentales para la PlanificaciÃ³n
+
+**PlanStep - Paso individual:**
+```python
+@dataclass
+class PlanStep:
+    action: str                    # AcciÃ³n a ejecutar
+    description: str               # DescripciÃ³n del paso
+    dependencies: List[str]        # Dependencias
+    estimated_duration: float     # DuraciÃ³n estimada
+    priority: int                  # Prioridad
+    status: str                   # Estado actual
+```
+
+**Plan - Plan completo:**
+```python
+@dataclass
+class Plan:
+    goal: str                      # Objetivo final
+    steps: List[PlanStep]         # Lista de pasos
+    created_at: float             # Timestamp de creaciÃ³n
+    estimated_total_duration: float # DuraciÃ³n total estimada
+    status: str                   # Estado del plan
+```
+
+**Planner - Planificador base:**
+- **create_plan():** Crear plan para un objetivo
+- **execute_plan():** Ejecutar plan completo
+- **get_plan_status():** Monitorear progreso
+
+---
+
+## Slide 5: PlanificaciÃ³n JerÃ¡rquica
+**TÃ­tulo:** Script 1 - DescomposiciÃ³n por Niveles de AbstracciÃ³n
+
+**Conceptos clave:**
+- DescomposiciÃ³n de objetivos complejos en sub-objetivos
+- MÃºltiples niveles de abstracciÃ³n (high, medium, low)
+- PriorizaciÃ³n por nivel de abstracciÃ³n
+
+**Proceso de planificaciÃ³n:**
+```python
+def create_plan(self, goal: str):
+    # 1. Descomponer objetivo en sub-objetivos
+    sub_goals = self._decompose_goal(goal)
+    
+    # 2. Crear pasos para cada nivel
+    for level in ["high", "medium", "low"]:
+        level_steps = self._create_level_steps(sub_goals, level)
+        steps.extend(level_steps)
+    
+    # 3. Ejecutar por prioridad (high â†’ medium â†’ low)
+```
+
+**Ejemplo de descomposiciÃ³n:**
+- **Objetivo:** "Investigar inteligencia artificial"
+- **Sub-objetivos:** ["recopilar informaciÃ³n", "analizar datos", "sintetizar resultados"]
+- **Pasos por nivel:**
+  - High: Estrategia general de investigaciÃ³n
+  - Medium: Identificar fuentes y mÃ©todos
+  - Low: Ejecutar bÃºsquedas especÃ­ficas
+
+**Ventajas:**
+- Estructura clara y mantenible
+- Escalabilidad para objetivos complejos
+- Facilita delegaciÃ³n de tareas
+
+---
+
+## Slide 6: PlanificaciÃ³n Reactiva
+**TÃ­tulo:** Respuesta DinÃ¡mica a Cambios del Entorno
+
+**Arquitectura basada en reglas:**
+```python
+def add_rule(self, condition: Callable, action: Callable):
+    """Agregar regla: SI condiciÃ³n ENTONCES acciÃ³n"""
+    def rule(state: Dict[str, Any]):
+        if condition(state):
+            return action(state)
+        return None
+    self.rules.append(rule)
+```
+
+**Ejemplo de regla reactiva:**
+```python
+# CondiciÃ³n: temperatura alta
+def high_temperature_condition(state):
+    return state.get("temperature", 0) > 30
+
+# AcciÃ³n: activar refrigeraciÃ³n  
+def high_temperature_action(state):
+    return "Activar sistema de refrigeraciÃ³n"
+
+reactive_planner.add_rule(high_temperature_condition, high_temperature_action)
+```
+
+**Ciclo de ejecuciÃ³n reactiva:**
+1. **Observar** entorno actual
+2. **Evaluar** reglas contra estado actual
+3. **Seleccionar** respuesta apropiada
+4. **Ejecutar** acciÃ³n seleccionada
+5. **Actualizar** estado y repetir
+
+**Casos de uso ideales:**
+- Sistemas de monitoreo en tiempo real
+- Respuesta a eventos inesperados
+- Entornos altamente dinÃ¡micos
+- Control de sistemas automatizados
+
+---
+
+## Slide 7: PlanificaciÃ³n Orientada a Objetivos
+**TÃ­tulo:** PlanificaciÃ³n Hacia AtrÃ¡s con Precondiciones
+
+**DefiniciÃ³n de acciones:**
+```python
+def add_action(self, action: str, preconditions: List[str], effects: List[str]):
+    """Definir acciÃ³n con sus precondiciones y efectos"""
+    self.preconditions[action] = preconditions
+    self.effects[action] = effects
+```
+
+**Algoritmo de planificaciÃ³n hacia atrÃ¡s:**
+```python
+def backward_planning(self, goal: str, current_state: Dict):
+    steps = []
+    remaining_goals = [goal]
+    
+    while remaining_goals:
+        current_goal = remaining_goals.pop(0)
+        
+        # Encontrar acciÃ³n que logre el objetivo
+        action = self.find_action_for_goal(current_goal)
+        
+        # Agregar precondiciones como nuevos objetivos
+        for precond in self.preconditions[action]:
+            remaining_goals.append(precond)
+```
+
+**Ejemplo prÃ¡ctico:**
+- **Objetivo:** Obtener conocimiento de IA
+- **Acciones disponibles:**
+  - investigar_ia: requiere [internet, tiempo] â†’ produce [conocimiento_ia]
+  - conectar_internet: requiere [] â†’ produce [internet]
+  - reservar_tiempo: requiere [] â†’ produce [tiempo]
+
+**Plan resultante:**
+1. conectar_internet
+2. reservar_tiempo  
+3. investigar_ia
+
+---
+
+## Slide 8: OrquestaciÃ³n Multi-Agente BÃ¡sica
+**TÃ­tulo:** Script 2 - CoordinaciÃ³n Simple entre Agentes
+
+**Concepto bÃ¡sico:**
+Dos o mÃ¡s agentes colaboran secuencialmente para completar una tarea.
+
+**ImplementaciÃ³n simple:**
+```python
+class AgentA:
+    def act(self, info):
+        return f"Agente A busca informaciÃ³n sobre '{info}'"
+
+class AgentB:
+    def act(self, data):
+        return f"Agente B analiza los datos: '{data}'"
+
+# OrquestaciÃ³n
+info = "recetas de cafÃ©"
+datos = agente_a.act(info)      # Paso 1: BÃºsqueda
+resultado = agente_b.act(datos)  # Paso 2: AnÃ¡lisis
+```
+
+**Flujo de coordinaciÃ³n:**
+```
+Input â†’ Agente A (BÃºsqueda) â†’ Datos intermedios â†’ Agente B (AnÃ¡lisis) â†’ Output final
+```
+
+**Ventajas de la especializaciÃ³n:**
+- Cada agente se enfoca en su expertise
+- ReutilizaciÃ³n de agentes en diferentes flujos
+- Escalabilidad mediante composiciÃ³n
+- Mantenimiento mÃ¡s simple
+
+---
+
+## Slide 9: OrquestaciÃ³n Avanzada con CrewAI
+**TÃ­tulo:** Script 2 - Equipos Especializados con Dependencias
+
+**Agentes especializados:**
+```python
+# Agente especializado en investigaciÃ³n
+investigador = Agent(
+    role="Investigador",
+    goal="Buscar informaciÃ³n sobre la capital de Francia",
+    backstory="Eres experto en encontrar datos rÃ¡pidos."
+)
+
+# Agente especializado en redacciÃ³n
+redactor = Agent(
+    role="Redactor", 
+    goal="Redactar una respuesta clara y breve",
+    backstory="Eres especialista en explicar conceptos de forma sencilla."
+)
+```
+
+**Tareas con dependencias:**
+```python
+tarea_investigar = Task(
+    description="Busca cuÃ¡l es la capital de Francia",
+    agent=investigador
+)
+
+tarea_redactar = Task(
+    description="Redacta una respuesta usando la informaciÃ³n encontrada",
+    agent=redactor,
+    context=[tarea_investigar]  # Dependencia explÃ­cita
+)
+```
+
+**OrquestaciÃ³n automÃ¡tica:**
+```python
+crew = Crew(
+    agents=[investigador, redactor],
+    tasks=[tarea_investigar, tarea_redactar],
+    verbose=True
+)
+result = crew.kickoff()  # EjecuciÃ³n automÃ¡tica en orden correcto
+```
+
+---
+
+## Slide 10: Patrones de CoordinaciÃ³n Multi-Agente
+**TÃ­tulo:** Estrategias de CoordinaciÃ³n entre Agentes
+
+**1. Pipeline Secuencial:**
+```
+Agente A â†’ Agente B â†’ Agente C â†’ Resultado
+```
+- Cada agente procesa salida del anterior
+- Control total sobre el flujo
+- FÃ¡cil de implementar y debugear
+
+**2. CoordinaciÃ³n Paralela:**
+```
+     â”Œâ”€â”€ Agente A â”€â”€â”
+Inputâ”œâ”€â”€ Agente B â”€â”€â”¤ â†’ Agregador â†’ Resultado
+     â””â”€â”€ Agente C â”€â”€â”˜
+```
+- Agentes trabajan simultÃ¡neamente
+- Requiere mecanismo de agregaciÃ³n
+- Mayor velocidad de procesamiento
+
+**3. CoordinaciÃ³n JerÃ¡rquica:**
+```
+      Manager Agent
+     /      |      \
+Agent A  Agent B  Agent C
+```
+- Agente manager coordina subordinados
+- DelegaciÃ³n inteligente de tareas
+- Escalable para equipos grandes
+
+**4. CoordinaciÃ³n Basada en Eventos:**
+```
+Event Bus
+    â†“
+â”Œâ”€ Agent A â†â†’ Agent B â”€â”
+â”‚                     â”‚
+â””â”€ Agent C â†â†’ Agent D â”€â”˜
+```
+- ComunicaciÃ³n mediante eventos
+- MÃ¡xima flexibilidad
+- Patrones de comunicaciÃ³n complejos
+
+---
+
+## Slide 11: GestiÃ³n de Dependencias y Flujos
+**TÃ­tulo:** Manejo de Tareas Interdependientes
+
+**Tipos de dependencias:**
+
+**1. Dependencia Secuencial:**
+- Tarea B requiere completar Tarea A
+- **Ejemplo:** Investigar â†’ Analizar â†’ Escribir
+
+**2. Dependencia de Recursos:**
+- MÃºltiples tareas compiten por mismo recurso
+- **Ejemplo:** Dos agentes necesitan acceso a API limitada
+
+**3. Dependencia Condicional:**
+- Tarea se ejecuta solo si se cumple condiciÃ³n
+- **Ejemplo:** Traducir solo si el texto no estÃ¡ en espaÃ±ol
+
+**4. Dependencia Temporal:**
+- Tareas deben ejecutarse en ventana de tiempo especÃ­fica
+- **Ejemplo:** Enviar reporte todos los lunes a las 9 AM
+
+**GestiÃ³n automÃ¡tica de dependencias:**
+```python
+class DependencyManager:
+    def resolve_dependencies(self, tasks: List[Task]):
+        # Crear grafo de dependencias
+        graph = self.build_dependency_graph(tasks)
+        
+        # Ordenamiento topolÃ³gico
+        execution_order = self.topological_sort(graph)
+        
+        # Detectar ciclos
+        if self.has_cycles(graph):
+            raise Exception("Dependencias circulares detectadas")
+        
+        return execution_order
+```
+
+---
+
+## Slide 12: Algoritmos de Scheduling y AsignaciÃ³n
+**TÃ­tulo:** OptimizaciÃ³n de Recursos y Tiempo
+
+**Algoritmos de scheduling:**
+
+**1. First Come, First Served (FCFS):**
+```python
+def fcfs_scheduling(tasks):
+    return sorted(tasks, key=lambda t: t.created_at)
+```
+
+**2. Shortest Job First (SJF):**
+```python
+def sjf_scheduling(tasks):
+    return sorted(tasks, key=lambda t: t.estimated_duration)
+```
+
+**3. Priority-Based Scheduling:**
+```python
+def priority_scheduling(tasks):
+    return sorted(tasks, key=lambda t: t.priority, reverse=True)
+```
+
+**4. Round Robin:**
+```python
+def round_robin_scheduling(tasks, time_quantum):
+    # Ejecutar cada tarea por time_quantum
+    # Rotar entre tareas hasta completar todas
+```
+
+**AsignaciÃ³n de agentes a tareas:**
+```python
+class TaskAssigner:
+    def assign_tasks(self, tasks: List[Task], agents: List[Agent]):
+        assignments = {}
+        
+        for task in tasks:
+            # Encontrar agente mÃ¡s adecuado
+            best_agent = self.find_best_agent(task, agents)
+            
+            # Verificar disponibilidad
+            if self.is_agent_available(best_agent):
+                assignments[task.id] = best_agent
+            else:
+                # Poner en cola de espera
+                self.queue_task(task)
+        
+        return assignments
+```
+
+---
+
+## Slide 13: Manejo de Conflictos y ResoluciÃ³n
+**TÃ­tulo:** Estrategias para Resolver Conflictos entre Agentes
+
+**Tipos de conflictos:**
+
+**1. Conflictos de Recursos:**
+- MÃºltiples agentes necesitan el mismo recurso
+- **SoluciÃ³n:** Resource pooling, queuing, time-sharing
+
+**2. Conflictos de Objetivos:**
+- Agentes con objetivos contradictorios
+- **SoluciÃ³n:** PriorizaciÃ³n, negociaciÃ³n, arbitraje
+
+**3. Conflictos de InformaciÃ³n:**
+- Agentes con informaciÃ³n inconsistente
+- **SoluciÃ³n:** Validation, consensus, authoritative source
+
+**Estrategias de resoluciÃ³n:**
+
+**1. Arbitraje Centralizado:**
+```python
+class ConflictArbiter:
+    def resolve_conflict(self, conflicting_agents, resource):
+        # Evaluar prioridades
+        priorities = [agent.priority for agent in conflicting_agents]
+        
+        # Asignar a agente de mayor prioridad
+        winner = max(conflicting_agents, key=lambda a: a.priority)
+        return winner
+```
+
+**2. NegociaciÃ³n Distribuida:**
+```python
+class NegotiationProtocol:
+    def negotiate(self, agents, resource):
+        bids = {}
+        for agent in agents:
+            bid = agent.calculate_bid(resource)
+            bids[agent.id] = bid
+        
+        # Asignar al mejor postor
+        winner = max(bids.items(), key=lambda x: x[1])
+        return winner[0]
+```
+
+**3. Consensus Building:**
+```python
+def build_consensus(agents, proposal):
+    votes = [agent.vote(proposal) for agent in agents]
+    
+    if sum(votes) / len(votes) > 0.6:  # 60% de aprobaciÃ³n
+        return "approved"
+    else:
+        return "rejected"
+```
+
+---
+
+## Slide 14: Monitoreo y Observabilidad
+**TÃ­tulo:** Seguimiento de Sistemas Multi-Agente
+
+**MÃ©tricas de sistema:**
+
+**1. Performance Metrics:**
+```python
+class SystemMetrics:
+    def calculate_metrics(self, execution_data):
+        return {
+            "total_execution_time": self.calc_total_time(execution_data),
+            "task_success_rate": self.calc_success_rate(execution_data),
+            "resource_utilization": self.calc_resource_usage(execution_data),
+            "agent_efficiency": self.calc_agent_efficiency(execution_data)
+        }
+```
+
+**2. Health Monitoring:**
+```python
+def monitor_agent_health(agents):
+    health_status = {}
+    for agent in agents:
+        health_status[agent.id] = {
+            "status": agent.get_status(),
+            "last_activity": agent.last_activity_time,
+            "error_count": len(agent.errors),
+            "resource_usage": agent.get_resource_usage()
+        }
+    return health_status
+```
+
+**3. Performance Dashboards:**
+- Tiempo de respuesta promedio por agente
+- Tasa de Ã©xito de tareas
+- UtilizaciÃ³n de recursos
+- DetecciÃ³n de cuellos de botella
+
+**4. Alerting y Notificaciones:**
+```python
+class AlertManager:
+    def check_alerts(self, metrics):
+        alerts = []
+        
+        if metrics["task_success_rate"] < 0.9:
+            alerts.append("Low task success rate detected")
+        
+        if metrics["resource_utilization"] > 0.8:
+            alerts.append("High resource utilization")
+        
+        return alerts
+```
+
+---
+
+## Slide 15: PlanificaciÃ³n en LangChain
+**TÃ­tulo:** Script 1 - Herramientas de PlanificaciÃ³n con LangChain
+
+**Agente con herramientas de planificaciÃ³n:**
+```python
+from langchain.agents import initialize_agent, Tool, AgentType
+
+# Herramienta de planificaciÃ³n simple
+def pasos_cafe(_):
+    return "1. Calentar agua\n2. AÃ±adir cafÃ© al filtro\n3. Verter agua caliente\n4. Servir en una taza"
+
+herramienta_cafe = Tool(
+    name="PasosCafÃ©",
+    func=pasos_cafe,
+    description="Devuelve los pasos para preparar cafÃ©."
+)
+
+# Agente con capacidad de planificaciÃ³n
+agente = initialize_agent(
+    tools=[herramienta_cafe],
+    llm=llm,
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    verbose=True
+)
+```
+
+**Ventajas de LangChain para planificaciÃ³n:**
+- IntegraciÃ³n nativa con herramientas
+- Manejo automÃ¡tico de context y memoria
+- Soporte para mÃºltiples tipos de agentes
+- Ecosystem maduro de herramientas
+
+**Limitaciones:**
+- PlanificaciÃ³n principalmente reactiva
+- Menos control sobre algoritmos de planificaciÃ³n
+- Optimizado para agentes individuales
+
+---
+
+## Slide 16: Patrones de OrquestaciÃ³n Empresarial
+**TÃ­tulo:** Aplicaciones PrÃ¡cticas en Organizaciones
+
+**1. Pipeline de Procesamiento de Documentos:**
+```python
+# Equipo especializado para procesamiento de documentos
+document_crew = Crew([
+    extract_agent,     # Extrae texto e imÃ¡genes
+    analyze_agent,     # Analiza contenido y estructura
+    classify_agent,    # Clasifica tipo de documento
+    index_agent,       # Indexa para bÃºsqueda
+    notify_agent       # Notifica completaciÃ³n
+])
+```
+
+**2. Sistema de Customer Support:**
+```python
+# OrquestaciÃ³n para tickets de soporte
+support_flow = MultiAgentFlow([
+    intake_agent,      # Recibe y categoriza tickets
+    research_agent,    # Busca en knowledge base
+    specialist_agent,  # Agente especialista segÃºn categorÃ­a
+    qa_agent,         # Revisa calidad de respuesta
+    followup_agent    # Seguimiento con cliente
+])
+```
+
+**3. AnÃ¡lisis Financiero Automatizado:**
+```python
+# Pipeline de anÃ¡lisis financiero
+finance_pipeline = OrchestrationEngine([
+    data_collector,    # Recopila datos de mercado
+    risk_analyzer,     # Analiza riesgos
+    trend_analyzer,    # Identifica tendencias
+    report_generator,  # Genera reportes
+    compliance_checker # Verifica compliance
+])
+```
+
+**Beneficios organizacionales:**
+- AutomatizaciÃ³n de procesos complejos
+- Consistencia en la ejecuciÃ³n
+- Escalabilidad segÃºn demanda
+- Trazabilidad completa de operaciones
+
+---
+
+## Slide 17: OptimizaciÃ³n y Performance
+**TÃ­tulo:** Estrategias para Mejorar Eficiencia del Sistema
+
+**1. ParalelizaciÃ³n Inteligente:**
+```python
+class ParallelOrchestrator:
+    def identify_parallel_tasks(self, tasks):
+        parallel_groups = []
+        
+        for task in tasks:
+            # Identificar tareas sin dependencias mutuas
+            if not self.has_blocking_dependencies(task, tasks):
+                parallel_groups.append(task)
+        
+        return parallel_groups
+    
+    def execute_parallel(self, task_group):
+        with ThreadPoolExecutor() as executor:
+            futures = [executor.submit(task.execute) for task in task_group]
+            results = [future.result() for future in futures]
+        return results
+```
+
+**2. Caching Inteligente:**
+```python
+class PlanCache:
+    def __init__(self):
+        self.cache = {}
+    
+    def get_cached_plan(self, goal, context):
+        cache_key = self.generate_cache_key(goal, context)
+        return self.cache.get(cache_key)
+    
+    def cache_plan(self, goal, context, plan):
+        cache_key = self.generate_cache_key(goal, context)
+        self.cache[cache_key] = plan
+```
+
+**3. Load Balancing:**
+```python
+class LoadBalancer:
+    def assign_task(self, task, available_agents):
+        # Calcular carga actual de cada agente
+        agent_loads = {agent.id: agent.current_load() for agent in available_agents}
+        
+        # Asignar al agente con menor carga
+        least_loaded = min(agent_loads.items(), key=lambda x: x[1])
+        return least_loaded[0]
+```
+
+**4. Adaptive Scheduling:**
+```python
+class AdaptiveScheduler:
+    def adjust_priorities(self, tasks, performance_data):
+        for task in tasks:
+            # Ajustar prioridad basada en performance histÃ³rica
+            if task.type in performance_data["slow_tasks"]:
+                task.priority += 1  # Aumentar prioridad
+```
+
+---
+
+## Slide 18: DesafÃ­os y Consideraciones
+**TÃ­tulo:** Retos en PlanificaciÃ³n y OrquestaciÃ³n
+
+**DesafÃ­os tÃ©cnicos:**
+
+**1. Complejidad Computacional:**
+- PlanificaciÃ³n Ã³ptima puede ser NP-hard
+- **SoluciÃ³n:** HeurÃ­sticas, aproximaciones, bounded search
+
+**2. Escalabilidad:**
+- Performance degrada con nÃºmero de agentes
+- **SoluciÃ³n:** Clustering, hierarchical organization
+
+**3. Fault Tolerance:**
+- Fallos de agentes pueden interrumpir workflows
+- **SoluciÃ³n:** Redundancy, graceful degradation, retry policies
+
+**4. Dynamic Environments:**
+- Cambios del entorno invalidan planes
+- **SoluciÃ³n:** Continuous replanning, adaptive algorithms
+
+**DesafÃ­os organizacionales:**
+
+**1. Governance:**
+- QuiÃ©n define prioridades y polÃ­ticas
+- **SoluciÃ³n:** Clear ownership, policy engines
+
+**2. Auditability:**
+- Rastrear decisiones en sistemas complejos
+- **SoluciÃ³n:** Comprehensive logging, decision trails
+
+**3. Resource Management:**
+- Balancear carga entre sistemas
+- **SoluciÃ³n:** Resource quotas, fair scheduling
+
+**4. Change Management:**
+- EvoluciÃ³n de workflows sin interruption
+- **SoluciÃ³n:** Versioning, gradual rollouts
+
+---
+
+## Slide 19: Casos de Uso Avanzados
+**TÃ­tulo:** Implementaciones Sofisticadas de PlanificaciÃ³n
+
+**1. Smart City Management:**
+```python
+class SmartCityOrchestrator:
+    def __init__(self):
+        self.agents = {
+            "traffic": TrafficManagementAgent(),
+            "energy": EnergyOptimizationAgent(), 
+            "waste": WasteCollectionAgent(),
+            "emergency": EmergencyResponseAgent()
+        }
+    
+    def coordinate_city_operations(self, events):
+        # PlanificaciÃ³n global considerando interdependencias
+        for event in events:
+            affected_systems = self.identify_affected_systems(event)
+            plan = self.create_coordinated_response(affected_systems)
+            self.execute_plan(plan)
+```
+
+**2. Autonomous Vehicle Fleet:**
+```python
+class FleetOrchestrator:
+    def optimize_fleet_operations(self):
+        # CoordinaciÃ³n de mÃºltiples vehÃ­culos autÃ³nomos
+        vehicles = self.get_available_vehicles()
+        requests = self.get_pending_requests()
+        
+        # OptimizaciÃ³n global de rutas y asignaciones
+        optimal_assignments = self.solve_vehicle_routing_problem(vehicles, requests)
+        
+        # EjecuciÃ³n coordinada
+        for vehicle, route in optimal_assignments.items():
+            vehicle.execute_route(route)
+```
+
+**3. Financial Trading System:**
+```python
+class TradingOrchestrator:
+    def execute_trading_strategy(self):
+        # CoordinaciÃ³n de mÃºltiples agentes de trading
+        market_data = self.market_analyzer.get_current_data()
+        
+        # PlanificaciÃ³n de operaciones
+        trading_plan = self.strategy_planner.create_plan(market_data)
+        
+        # EjecuciÃ³n coordinada con risk management
+        for trade in trading_plan:
+            if self.risk_manager.approve_trade(trade):
+                self.execution_agent.execute_trade(trade)
+```
+
+---
+
+## Slide 20: PrÃ³ximos Pasos en RA2
+**TÃ­tulo:** Roadmap hacia IL2.4 y Proyecto Final
+
+**IL2.4 - Technical Documentation:**
+- DocumentaciÃ³n de arquitecturas de sistemas complejos
+- Design patterns para planificaciÃ³n y orquestaciÃ³n
+- Deployment guidelines y best practices
+- Monitoring y observability frameworks
+- **ConexiÃ³n con IL2.3:** Documentar sistemas de planificaciÃ³n implementados
+
+**Proyecto integrador RA2:**
+- **Componente IL2.1:** Framework de agentes (LangChain/CrewAI)
+- **Componente IL2.2:** Sistema de memoria y herramientas MCP
+- **Componente IL2.3:** PlanificaciÃ³n y orquestaciÃ³n multi-agente
+- **Componente IL2.4:** DocumentaciÃ³n tÃ©cnica completa
+
+**Arquitectura del proyecto final:**
+```
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚           Sistema Multi-Agente Empresarial      â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ PlanificaciÃ³n & OrquestaciÃ³n (IL2.3)           â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Memoria & Herramientas MCP (IL2.2)             â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ Agentes LangChain/CrewAI (IL2.1)               â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+```
+
+**Deliverables esperados:**
+- Sistema funcional end-to-end
+- DocumentaciÃ³n tÃ©cnica completa
+- EvaluaciÃ³n de performance y escalabilidad
+- Plan de deployment y operations
+
+---
+
+## Slide 21: Resumen Ejecutivo
+**TÃ­tulo:** Conceptos Clave del MÃ³dulo IL2.3
+
+**Fundamentos adquiridos:**
+1. **Estrategias de planificaciÃ³n** (jerÃ¡rquica, reactiva, orientada a objetivos)
+2. **OrquestaciÃ³n multi-agente** con coordinaciÃ³n automÃ¡tica
+3. **GestiÃ³n de dependencias** y flujos de trabajo complejos
+4. **Algoritmos de scheduling** y asignaciÃ³n de recursos
+5. **Monitoreo y observabilidad** de sistemas distribuidos
+
+**Implementaciones prÃ¡cticas:**
+- Planificadores jerÃ¡rquicos con descomposiciÃ³n de objetivos
+- Sistemas reactivos con reglas dinÃ¡micas
+- PlanificaciÃ³n hacia atrÃ¡s con precondiciones
+- OrquestaciÃ³n CrewAI con dependencias entre tareas
+- CoordinaciÃ³n multi-agente con resoluciÃ³n de conflictos
+
+**Diferenciadores clave:**
+- **PlanificaciÃ³n vs. Reactividad:** AnticipaciÃ³n vs. respuesta inmediata
+- **CoordinaciÃ³n vs. Independencia:** SincronizaciÃ³n vs. autonomÃ­a
+- **OptimizaciÃ³n vs. Simplicidad:** Eficiencia vs. facilidad de implementaciÃ³n
+- **Global vs. Local:** VisiÃ³n del sistema vs. perspectiva individual
+
+**PreparaciÃ³n para IL2.4:**
+- Foundation sÃ³lida en arquitecturas complejas
+- Experiencia con sistemas distribuidos
+- ComprensiÃ³n de trade-offs de performance
+- Base para documentaciÃ³n tÃ©cnica avanzada
+
+**Impacto organizacional:**
+- AutomatizaciÃ³n de procesos multi-departamentales
+- OptimizaciÃ³n de recursos y tiempo
+- Escalabilidad de operaciones complejas
+- Foundation para transformaciÃ³n digital coordinada
+
+
