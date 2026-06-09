@@ -95,18 +95,28 @@ requestAnimationFrame(animationLoop);
 // --- FIN LÓGICA DE ANIMACIÓN ---
 
 // --- FUNCIÓN PARA REPRODUCIR VOZ HUMANA (EDGE TTS) ---
-window.reproducirVozHumana = async function(texto, btnElement, animatorIndex) {
+window.reproducirVozHumana = async function(btnElement, animatorIndex) {
     if (btnElement.classList.contains('cargando-voz')) return;
-    
+
+    const textoCrudo = btnElement.dataset.texto;
+    if (!textoCrudo) return;
+
     const iconoOriginal = btnElement.textContent;
     btnElement.textContent = "⏳";
     btnElement.classList.add('cargando-voz');
 
     try {
+        const textoLimpio = textoCrudo
+            .replace(/\p{Emoji}/gu, '')
+            .replace(/\*\*/g, '')
+            .replace(/\*/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+
         const res = await fetch('/api/tts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ texto: texto })
+            body: JSON.stringify({ texto: textoLimpio })
         });
 
         if (!res.ok) throw new Error("Error en la síntesis de voz");
@@ -115,7 +125,6 @@ window.reproducirVozHumana = async function(texto, btnElement, animatorIndex) {
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
         
-        // Si hay un animador vinculado, sincronizamos la boca con el audio
         const animator = activeAnimators[animatorIndex];
         if (animator) {
             audio.onplay = () => animator.setState('talk');
@@ -261,15 +270,29 @@ async function enviarMensajeChat() {
 
         const animatorIndex = activeAnimators.length - 1; // El índice del animador actual
 
-        const escapedText = data.respuesta.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        const textoOriginal = data.respuesta;
 
         // Herramientas: copiar y voz
         const herramientas = document.createElement('div');
         herramientas.className = "herramientas-msg";
-        herramientas.innerHTML = `
-            <span title="Copiar" onclick="navigator.clipboard.writeText('${escapedText}')">📋</span>
-            <span title="Escuchar Voz Humana" onclick="window.reproducirVozHumana('${escapedText}', this, ${animatorIndex})">🔊</span>
-        `;
+
+        const btnCopiar = document.createElement('span');
+        btnCopiar.title = "Copiar";
+        btnCopiar.textContent = "📋";
+        btnCopiar.addEventListener('click', () => {
+            navigator.clipboard.writeText(textoOriginal);
+        });
+
+        const btnVoz = document.createElement('span');
+        btnVoz.title = "Escuchar Voz Humana";
+        btnVoz.textContent = "🔊";
+        btnVoz.dataset.texto = textoOriginal;
+        btnVoz.addEventListener('click', function() {
+            window.reproducirVozHumana(this, animatorIndex);
+        });
+
+        herramientas.appendChild(btnCopiar);
+        herramientas.appendChild(btnVoz);
         columnaIA.appendChild(herramientas);
 
     } catch (error) {
