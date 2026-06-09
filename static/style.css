@@ -1,0 +1,482 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Fredoka', 'Segoe UI', sans-serif;
+}
+
+body {
+    background: #E7E3D8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* ============ CONTENEDOR PRINCIPAL ============ */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 240px 1fr 300px;
+    gap: 0;
+    width: 100%;
+    max-width: 1300px;
+    height: 90vh;
+    background: #E7E3D8;
+    border: 4px solid #000000;
+    border-radius: 50px;
+    overflow: hidden;
+    padding: 12px;
+}
+
+/* ============ PANEL IZQUIERDO (NEGRO) ============ */
+.menu-lateral-negro {
+    background: #000000;
+    border-radius: 40px;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    color: #FFFFFF;
+}
+
+.logo-img {
+    width: 100%;
+    max-width: 110px;
+    display: block;
+    margin: 0 auto;
+}
+
+.enlaces-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.item-link {
+    background: transparent;
+    border: none;
+    color: #FFFFFF;
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #6B6B6B;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.item-link:last-child {
+    border-bottom: none;
+}
+
+.item-link:hover, .item-link.activo {
+    font-weight: 700;
+    border-bottom-color: #FFFFFF;
+}
+
+/* ============ PANEL CENTRAL ============ */
+.pantalla-central-borde {
+    background: #E7E3D8;
+    border: 4px solid #000000;
+    border-radius: 40px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin: 0 12px;
+    min-height: 0;
+}
+
+/* Pestañas */
+.seccion-pestana {
+    display: none;
+    flex: 1;
+}
+.seccion-pestana.activa {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.area-conversacion-chat {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.scroll-burbujas-chat {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* Barra de scroll personalizada y delgada para el chat */
+.scroll-burbujas-chat::-webkit-scrollbar {
+    width: 8px;
+}
+.scroll-burbujas-chat::-webkit-scrollbar-track {
+    background: transparent;
+}
+.scroll-burbujas-chat::-webkit-scrollbar-thumb {
+    background: #FFFFFF;
+    border-radius: 10px;
+    border: 1px solid #E7E3D8;
+}
+.scroll-burbujas-chat::-webkit-scrollbar-thumb:hover {
+    background: #f0f0f0;
+}
+
+/* Pantalla de bienvenida */
+.bienvenida-ia-bloque {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 15px;
+}
+.sol-logo-grande {
+    width: 90px;
+    height: auto;
+    animation: bounce 3s infinite ease-in-out;
+}
+.bienvenida-ia-bloque h1 {
+    font-size: 30px;
+    color: #000000;
+}
+
+/* ============ MENSAJES DEL CHAT CON AVATAR ============ */
+.mensaje-fila {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    max-width: 85%;
+}
+.mensaje-fila.usuario {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+.mensaje-fila.agente {
+    align-self: flex-start;
+}
+
+.avatar-msg {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 3px solid #000000;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: #FFFFFF;
+    overflow: hidden;
+}
+.avatar-msg img,
+.avatar-msg canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mensaje {
+    padding: 14px 20px;
+    border-radius: 25px;
+    border: 3px solid #000000;
+    font-size: 15px;
+    color: #000000;
+    line-height: 1.4;
+    font-weight: 500;
+}
+.mensaje-ia {
+    background: #EBCF7C;
+    border-bottom-left-radius: 5px;
+}
+.mensaje-usuario {
+    background: #B8D6EB;
+    border-bottom-right-radius: 5px;
+}
+
+/* Herramientas debajo de mensajes IA */
+.herramientas-msg {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    padding-left: 48px;
+}
+.herramientas-msg span {
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+.herramientas-msg span:hover {
+    opacity: 1;
+}
+
+/* ============ INPUT DE CHAT ============ */
+.caja-input-pildora-contenedor {
+    display: flex;
+    background: #F5F5F5;
+    border: none;
+    border-radius: 999px;
+    padding: 0 8px 0 20px;
+    align-items: center;
+    margin-top: 10px;
+    height: 48px;
+    flex-shrink: 0;
+}
+.caja-input-pildora-contenedor input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    background: transparent;
+    height: 100%;
+}
+.caja-input-pildora-contenedor input::placeholder {
+    color: #B7B7B7;
+}
+.iconos-input-derecha {
+    display: flex;
+    gap: 8px;
+    font-size: 18px;
+}
+.iconos-input-derecha span {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #B8D6EB;
+    border: 2px solid #000000;
+    transition: transform 0.15s;
+}
+.iconos-input-derecha span:active {
+    transform: scale(0.92);
+}
+
+/* Botones de sugerencia */
+.sugerencias-inferiores-capsulas {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 8px;
+    flex-shrink: 0;
+}
+.btn-sug-pildora {
+    background: #000000;
+    color: #FFFFFF;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 999px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+    font-weight: 500;
+}
+.btn-sug-pildora:hover {
+    transform: scale(1.05);
+}
+
+/* ============ PANEL DERECHO ============ */
+.panel-clima-derecho {
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 0 6px 14px;
+    border-left: 4px solid #7E7E7E;
+    min-height: 0;
+}
+.panel-clima-derecho h3 {
+    font-size: 16px;
+    text-align: center;
+    color: #000000;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #7E7E7E;
+    flex-shrink: 0;
+}
+
+.grilla-dias-manga {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+    align-content: start;
+}
+
+.cargando-placeholder {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 20px;
+    font-weight: 500;
+    color: #777;
+}
+
+/* Tarjetas del clima */
+.tarjeta-clima-dia {
+    border: 2px solid #000000;
+    border-radius: 14px;
+    padding: 8px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    position: relative;
+    overflow: visible;
+}
+
+.tarjeta-clima-dia.hoy-activo {
+    border: 5px solid #000000 !important;
+    transform: scale(1.03);
+    z-index: 2;
+}
+.badge-hoy {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    color: #fff;
+    font-size: 9px;
+    padding: 2px 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+    z-index: 3;
+}
+
+.dia-icono {
+    font-size: 22px;
+    line-height: 1;
+}
+.dia-temperatura-principal {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+.dia-texto {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: capitalize;
+    text-align: center;
+    color: #555;
+}
+.dia-temperaturas {
+    display: flex;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+}
+.dia-temperaturas .max {
+    background-color: rgba(255,255,255,0.6);
+    padding: 1px 5px;
+    border-radius: 6px;
+    border: 1px solid #000;
+}
+.dia-temperaturas .min {
+    background-color: rgba(0,0,0,0.08);
+    padding: 1px 5px;
+    border-radius: 6px;
+    color: #555;
+}
+
+/* Selector de ciudad */
+.ubicacion-selector-footer {
+    border: 2px solid #000000;
+    background-color: #FFFFFF;
+    padding: 8px 14px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    position: relative;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.menu-ciudades-popover {
+    display: none;
+    position: absolute;
+    bottom: 110%;
+    left: 0;
+    width: 100%;
+    background: #FFFFFF;
+    border: 3px solid #000000;
+    border-radius: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 99;
+}
+.menu-ciudades-popover.abierto { display: block; }
+.opcion-comuna-item {
+    padding: 10px 15px;
+    color: #000;
+    cursor: pointer;
+}
+.opcion-comuna-item:hover {
+    background-color: #F4EFE6;
+}
+
+/* ============ PESTAÑA REPORTE ============ */
+.formulario-reporte-manga {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
+}
+.campo-pildora input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 3px solid #000;
+    border-radius: 20px;
+    margin-top: 5px;
+}
+.btn-negro-pildora {
+    background: #000;
+    color: #fff;
+    padding: 12px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+}
+.consola-status-manga {
+    background: #000;
+    color: #0f0;
+    padding: 15px;
+    border-radius: 16px;
+    font-family: monospace;
+    font-size: 13px;
+}
+.preview-bloque-manga iframe {
+    width: 100%;
+    height: 260px;
+    border: 3px solid #000;
+    border-radius: 16px;
+    margin-top: 10px;
+}
+
+/* Animación */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}

@@ -14,6 +14,7 @@ class ConsultarRecomendacionesInput(BaseModel):
     lluvia_mm: float = Field(default=0.0, description="Cantidad de lluvia actual en mm")
     mes: int = Field(default=1, description="Número del mes actual (1-12)")
     horario: str = Field(default="mañana", description="Horario actual: 'mañana', 'tarde' o 'noche'")
+    comuna: str = Field(default="Puerto Montt", description="Nombre de la comuna para personalizar las recomendaciones")
 
 
 NOMBRES_MES = {
@@ -39,14 +40,14 @@ def obtener_mes_actual() -> int:
 class ConsultarRecomendacionesTool(BaseTool):
     name: str = "consultar_recomendaciones"
     description: str = (
-        "Útil para obtener recomendaciones de lugares y actividades en Puerto Montt "
+        "Útil para obtener recomendaciones de lugares y actividades "
         "basadas en el clima actual (WMO, temperatura, lluvia), la temporada y el horario. "
         "Debe usarse después de consultar el clima."
     )
     args_schema: Type[BaseModel] = ConsultarRecomendacionesInput
 
     def _run(self, codigo_wmo: int, temperatura: float, lluvia_mm: float,
-             mes: int, horario: str) -> str:
+             mes: int, horario: str, comuna: str = "Puerto Montt") -> str:
         try:
             if not os.path.exists(RUTA_LUGARES):
                 return "No hay base de lugares disponibles."
@@ -81,7 +82,7 @@ class ConsultarRecomendacionesTool(BaseTool):
                 lineas.append(f"{icono} **{l['nombre']}** — {l['descripcion']}")
 
             return (
-                f"Recomendaciones para Puerto Montt en {nombre_mes} ({horario}):\n"
+                f"Recomendaciones para {comuna} en {nombre_mes} ({horario}):\n"
                 + "\n".join(lineas)
             )
 

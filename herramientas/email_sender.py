@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class EnviarEmailInput(BaseModel):
-    destinatario: str = Field(default="benjita1b4@gmail.com", description="Dirección de correo electrónico que recibirá el reporte.")
+    destinatario: str = Field(description="Dirección de correo electrónico que recibirá el reporte.")
     asunto: str = Field(description="Asunto del correo, debe ser claro y descriptivo (ej: '☁️ Reporte Meteorológico Puerto Montt')")
     cuerpo: str = Field(description="Contenido completo del mensaje, incluyendo las métricas, el historial comparativo y los consejos personalizados.")
 

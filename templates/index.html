@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agente Clima</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        
+        <aside class="menu-lateral-negro">
+            <div class="logo-seccion">
+                <img src="{{ url_for('static', filename='Logo.png') }}" alt="Agente Clima" class="logo-img">
+            </div>
+            <nav class="enlaces-menu">
+                <button onclick="cambiarPestaña('chat')" id="btn-pestana-chat" class="item-link activo">Conversar IA</button>
+                <button onclick="cambiarPestaña('reporte')" id="btn-pestana-reporte" class="item-link">Generar reporte a mi correo</button>
+                <button class="item-link">Historial de reportes</button>
+                <button class="item-link">Quienes somos</button>
+            </nav>
+        </aside>
+
+        <main class="pantalla-central-borde">
+            
+            <section id="contenido-chat" class="seccion-pestana activa">
+                <div class="area-conversacion-chat">
+                    
+                    <div id="historial-mensajes" class="scroll-burbujas-chat">
+                        <div id="welcome-screen" class="bienvenida-ia-bloque">
+                            <img src="{{ url_for('static', filename='Logo.png') }}" alt="Agente Clima" class="sol-logo-grande">
+                            <h1>Agente-Clima</h1>
+                        </div>
+                    </div>
+
+                    <div class="caja-input-pildora-contenedor">
+                        <input type="text" id="input-mensaje-usuario" placeholder="Conversemos del clima..." onkeydown="if(event.key === 'Enter') { document.getElementById('welcome-screen').style.display='none'; enviarMensajeChat(); }">
+                        <div class="iconos-input-derecha">
+                            <span>🎙️</span>
+                            <span onclick="document.getElementById('welcome-screen').style.display='none'; enviarMensajeChat()" style="cursor:pointer;">➔</span>
+                        </div>
+                    </div>
+
+                    <div class="sugerencias-inferiores-capsulas">
+                        <button class="btn-sug-pildora" onclick="setSugerenciaChat('Recomiéndame un Outfit')">Recomiéndame un Outfit</button>
+                        <button class="btn-sug-pildora" onclick="setSugerenciaChat('Recomiéndame un lugar para salir')">Recomiéndame un lugar para salir</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="contenido-reporte" class="seccion-pestana">
+                <div class="formulario-reporte-manga">
+                    <h2>Configuración del Informe Formal</h2>
+                    <p>Este módulo ejecuta el pipeline de 6 pasos. Te enviará un correo HTML detallado.</p>
+                    <div class="campo-pildora">
+                        <label>TU CORREO ELECTRÓNICO:</label>
+                        <input type="email" id="input-correo" placeholder="ejemplo@correo.com">
+                    </div>
+                    <button class="btn-negro-pildora" onclick="dispararGeneracionReporte()">⚡ EJECUTAR PLANIFICADOR Y ENVIAR</button>
+                    
+                    <div id="consola-pasos" class="consola-status-manga" style="display: none;">
+                        <ul id="lista-pasos-progreso"></ul>
+                    </div>
+                    <div id="preview-reporte-contenedor" class="preview-bloque-manga" style="display: none;">
+                        <iframe id="iframe-preview" src="about:blank"></iframe>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <aside class="panel-clima-derecho">
+            <h3>Pronostico de la semana.</h3>
+            
+            <div id="contenedor-pronostico-semanal" class="grilla-dias-manga">
+                <div class="cargando-placeholder">Cargando datos...</div>
+            </div>
+
+            <div class="ubicacion-selector-footer" onclick="toggleMenuCiudades()">
+                <div class="pin-bloque">📍 <span id="nombre-comuna-activa">Puerto Montt</span> ➔</div>
+                <div id="menu-ciudades-desplegable" class="menu-ciudades-popover">
+                    </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='pronostico.js') }}"></script>
+    <script src="{{ url_for('static', filename='chat.js') }}"></script>
+    <script src="{{ url_for('static', filename='app-main.js') }}"></script>
+    <script>
+        function setSugerenciaChat(texto) {
+            const welcome = document.getElementById('welcome-screen');
+            if(welcome) welcome.style.display = 'none';
+            const input = document.getElementById('input-mensaje-usuario');
+            if(input) { input.value = texto; enviarMensajeChat(); }
+        }
+    </script>
+</body>
+</html>
