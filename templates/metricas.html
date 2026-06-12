@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Métricas - Agente Clima</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .metricas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            padding: 20px;
+        }
+        .metrica-card {
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 20px;
+            padding: 20px;
+        }
+        .metrica-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metrica-card .valor {
+            font-size: 32px;
+            font-weight: 700;
+            color: #000;
+        }
+        .metrica-card .valor.rojo { color: #e53e3e; }
+        .metrica-card .valor.verde { color: #38a169; }
+        .metrica-card .valor.azul { color: #3182ce; }
+        .metrica-card .valor.amarillo { color: #d69e2e; }
+        .metrica-card .subtexto {
+            font-size: 13px;
+            color: #888;
+            margin-top: 4px;
+        }
+        .tabla-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th {
+            background: #000;
+            color: #fff;
+            padding: 10px 12px;
+            text-align: left;
+        }
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge.ok { background: #c6f6d5; color: #22543d; }
+        .badge.err { background: #fed7d7; color: #742a2a; }
+        .badge.info { background: #bee3f8; color: #2a4365; }
+        .auto-refresh {
+            text-align: center;
+            padding: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+        .auto-refresh label { cursor: pointer; }
+        .nav-inline {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .nav-inline a {
+            padding: 8px 16px;
+            border: 2px solid #000;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #000;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .nav-inline a:hover, .nav-inline a.activo {
+            background: #000;
+            color: #fff;
+        }
+        .seccion-metrica {
+            display: none;
+        }
+        .seccion-metrica.activa {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container" style="grid-template-columns: 240px 1fr;">
+        <aside class="menu-lateral-negro">
+            <div class="logo-seccion">
+                <img src="{{ url_for('static', filename='Logo.png') }}" alt="Agente Clima" class="logo-img">
+            </div>
+            <nav class="enlaces-menu">
+                <a href="/" class="item-link">Volver al Dashboard</a>
+                <button onclick="cambiarSeccion('agente')" id="btn-agente" class="item-link activo">Agente</button>
+                <button onclick="cambiarSeccion('trazas')" id="btn-trazas" class="item-link">Trazabilidad</button>
+                <button onclick="cambiarSeccion('http')" id="btn-http" class="item-link">HTTP</button>
+            </nav>
+        </aside>
+
+        <main class="pantalla-central-borde">
+            <h2 style="text-align:center; margin-bottom: 10px;">Dashboard de Métricas</h2>
+            <div class="nav-inline">
+                <a href="/api/metricas" target="_blank" class="activo">API Raw</a>
+                <a href="/api/metricas/detalle" target="_blank">API Detalle</a>
+            </div>
+            <div class="auto-refresh">
+                <label><input type="checkbox" id="chk-auto-refresh" checked onchange="toggleAutoRefresh()"> Auto-refresh cada 10s</label>
+            </div>
+
+            <div id="seccion-agente" class="seccion-metrica activa">
+                <div id="metricas-agente" class="metricas-grid"></div>
+                <h3 style="padding: 0 20px; margin-top: 10px;">Últimas operaciones</h3>
+                <div class="tabla-container" style="padding: 0 20px;">
+                    <table id="tabla-metricas">
+                        <thead><tr><th>Operación</th><th>Duración</th><th>Tokens</th><th>Costo</th><th>Estado</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="seccion-trazas" class="seccion-metrica">
+                <div id="metricas-trazas" class="metricas-grid"></div>
+                <h3 style="padding: 0 20px; margin-top: 10px;">Trazas recientes</h3>
+                <div class="tabla-container" style="padding: 0 20px;">
+                    <table id="tabla-trazas">
+                        <thead><tr><th>Trace ID</th><th>Nombre</th><th>Duración</th><th>Estado</th><th>Spans</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="seccion-http" class="seccion-metrica">
+                <div id="metricas-http" class="metricas-grid"></div>
+                <h3 style="padding: 0 20px; margin-top: 10px;">Últimas peticiones HTTP</h3>
+                <div class="tabla-container" style="padding: 0 20px;">
+                    <table id="tabla-http">
+                        <thead><tr><th>Método</th><th>Ruta</th><th>Status</th><th>Duración</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let autoRefresh = true;
+        let refreshInterval = null;
+
+        function toggleAutoRefresh() {
+            autoRefresh = document.getElementById('chk-auto-refresh').checked;
+            if (autoRefresh) {
+                refreshInterval = setInterval(cargarDatos, 10000);
+            } else {
+                clearInterval(refreshInterval);
+            }
+        }
+
+        function cambiarSeccion(nombre) {
+            document.querySelectorAll('.seccion-metrica').forEach(s => s.classList.remove('activa'));
+            document.querySelectorAll('.item-link').forEach(b => b.classList.remove('activo'));
+            document.getElementById(`seccion-${nombre}`).classList.add('activa');
+            document.getElementById(`btn-${nombre}`).classList.add('activo');
+        }
+
+        function formatearMoneda(valor) {
+            if (valor === 0) return '$0';
+            if (valor < 0.001) return `$${valor.toExponential(2)}`;
+            return `$${valor.toFixed(6)}`;
+        }
+
+        function badge(estado) {
+            if (estado === true || estado === 'EXITOSO' || estado === 'OK') return '<span class="badge ok">OK</span>';
+            if (estado === false || estado === 'ERROR' || estado === 'ERR') return '<span class="badge err">ERROR</span>';
+            return `<span class="badge info">${estado}</span>`;
+        }
+
+        async function cargarDatos() {
+            try {
+                const res = await fetch('/api/metricas');
+                if (!res.ok) return;
+                const datos = await res.json();
+                const resDet = await fetch('/api/metricas/detalle');
+                const detalle = resDet.ok ? await resDet.json() : null;
+                actualizarAgente(datos);
+                actualizarTrazas(datos);
+                actualizarHttp(datos);
+                if (detalle) {
+                    actualizarTablaMetricas(detalle.metricas);
+                    actualizarTablaTrazas(detalle.trazas);
+                    actualizarTablaHttp(detalle.http);
+                }
+            } catch (e) {
+                console.error('Error cargando métricas:', e);
+            }
+        }
+
+        function actualizarAgente(datos) {
+            const a = datos.agente || {};
+            document.getElementById('metricas-agente').innerHTML = `
+                <div class="metrica-card"><h3>Total Operaciones</h3><div class="valor azul">${a.total_operaciones || 0}</div></div>
+                <div class="metrica-card"><h3>Tasa Error</h3><div class="valor ${(a.tasa_error_pct || 0) > 10 ? 'rojo' : 'verde'}">${(a.tasa_error_pct || 0).toFixed(1)}%</div></div>
+                <div class="metrica-card"><h3>Tiempo Promedio</h3><div class="valor">${(a.tiempo_promedio_ms || 0).toFixed(0)}<span style="font-size:16px;">ms</span></div></div>
+                <div class="metrica-card"><h3>Tiempo Máximo</h3><div class="valor amarillo">${(a.tiempo_maximo_ms || 0).toFixed(0)}<span style="font-size:16px;">ms</span></div></div>
+                <div class="metrica-card"><h3>Tokens Totales</h3><div class="valor">${(a.tokens_totales || 0).toLocaleString()}</div></div>
+                <div class="metrica-card"><h3>Costo Total</h3><div class="valor amarillo">${formatearMoneda(a.costo_total_usd || 0)}</div></div>
+            `;
+        }
+
+        function actualizarTrazas(datos) {
+            const t = datos.trazabilidad || {};
+            document.getElementById('metricas-trazas').innerHTML = `
+                <div class="metrica-card"><h3>Total Trazas</h3><div class="valor azul">${t.total_trazas || 0}</div></div>
+                <div class="metrica-card"><h3>Tasa Éxito</h3><div class="valor ${(t.tasa_exito_pct || 100) < 80 ? 'rojo' : 'verde'}">${(t.tasa_exito_pct || 100).toFixed(1)}%</div></div>
+                <div class="metrica-card"><h3>Duración Promedio</h3><div class="valor">${(t.duracion_promedio_ms || 0).toFixed(0)}<span style="font-size:16px;">ms</span></div></div>
+                <div class="metrica-card"><h3>Duración Máxima</h3><div class="valor amarillo">${(t.duracion_maxima_ms || 0).toFixed(0)}<span style="font-size:16px;">ms</span></div></div>
+            `;
+        }
+
+        function actualizarHttp(datos) {
+            const h = datos.http || {};
+            document.getElementById('metricas-http').innerHTML = `
+                <div class="metrica-card"><h3>Total Requests</h3><div class="valor azul">${h.total_peticiones || 0}</div></div>
+                <div class="metrica-card"><h3>Tiempo Promedio</h3><div class="valor">${(h.tiempo_promedio_ms || 0).toFixed(0)}<span style="font-size:16px;">ms</span></div></div>
+                <div class="metrica-card"><h3>Tiempo Máximo</h3><div class="valor amarillo">${(h.tiempo_maximo_ms || 0).toFixed(0)}<span style="font-size:16px;">ms</span></div></div>
+            `;
+        }
+
+        function actualizarTablaMetricas(metricas) {
+            const tbody = document.querySelector('#tabla-metricas tbody');
+            if (!metricas || metricas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">Sin datos</td></tr>';
+                return;
+            }
+            const ultimas = metricas.slice(-15).reverse();
+            tbody.innerHTML = ultimas.map(m => `
+                <tr>
+                    <td>${m.operacion || '—'}</td>
+                    <td>${m.duracion_ms ? m.duracion_ms.toFixed(0) + 'ms' : '—'}</td>
+                    <td>${m.tokens_total || 0}</td>
+                    <td>${formatearMoneda(m.costo_usd || 0)}</td>
+                    <td>${badge(m.exitoso)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function actualizarTablaTrazas(trazas) {
+            const tbody = document.querySelector('#tabla-trazas tbody');
+            if (!trazas || trazas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">Sin datos</td></tr>';
+                return;
+            }
+            const ultimas = trazas.slice(-15).reverse();
+            tbody.innerHTML = ultimas.map(t => `
+                <tr>
+                    <td style="font-family:monospace;">${t.trace_id}</td>
+                    <td>${t.nombre}</td>
+                    <td>${t.duracion_total_ms ? t.duracion_total_ms.toFixed(0) + 'ms' : '—'}</td>
+                    <td>${badge(t.estado)}</td>
+                    <td>${t.spans ? t.spans.length : 0}</td>
+                </tr>
+            `).join('');
+        }
+
+        function actualizarTablaHttp(http) {
+            const tbody = document.querySelector('#tabla-http tbody');
+            if (!http || http.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">Sin datos</td></tr>';
+                return;
+            }
+            const ultimas = http.slice(-20).reverse();
+            tbody.innerHTML = ultimas.map(h => `
+                <tr>
+                    <td>${h.method || '—'}</td>
+                    <td>${h.path || '—'}</td>
+                    <td>${badge(h.status < 400 ? 'OK' : 'ERR')} ${h.status}</td>
+                    <td>${h.duracion_ms ? h.duracion_ms.toFixed(0) + 'ms' : '—'}</td>
+                </tr>
+            `).join('');
+        }
+
+        cargarDatos();
+        refreshInterval = setInterval(cargarDatos, 10000);
+    </script>
+</body>
+</html>

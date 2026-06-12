@@ -1,3 +1,4 @@
+
 Write-Host "=== Iniciando Agente-Clima v1.0 ===" -ForegroundColor Cyan
 Write-Host ""
 

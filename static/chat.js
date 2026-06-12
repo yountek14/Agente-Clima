@@ -222,8 +222,9 @@ async function enviarMensajeChat() {
 
     const comunaActivaId = window.comunaSeleccionadaGlobal || "puerto-montt";
 
+    let respuesta, data;
     try {
-        const respuesta = await fetch('/api/chat', {
+        respuesta = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -233,9 +234,18 @@ async function enviarMensajeChat() {
             })
         });
 
-        if (!respuesta.ok) throw new Error("Error en la respuesta del agente de IA");
+        data = await respuesta.json();
 
-        const data = await respuesta.json();
+        if (data.autodestruct) {
+            activarAutodestruct();
+            inputElement.disabled = false;
+            return;
+        }
+
+        if (!respuesta.ok) {
+            const msg = data && data.error ? data.error : "Error en la respuesta del agente";
+            throw new Error(msg);
+        }
 
         // Mensaje IA con avatar animado por Canvas
         const filaIA = document.createElement('div');
@@ -300,11 +310,119 @@ async function enviarMensajeChat() {
         const nodoError = document.createElement('div');
         nodoError.className = "mensaje mensaje-ia";
         nodoError.style.backgroundColor = "#FF597B";
-        nodoError.textContent = "❌ Error: El agente no pudo procesar tu mensaje temporal.";
+        const detalles = data && data.error ? data.error : (error.message || "Error de conexión con el servidor.");
+        nodoError.textContent = "❌ " + detalles;
         historial.appendChild(nodoError);
     } finally {
         inputElement.disabled = false;
         inputElement.focus();
         historial.scrollTop = historial.scrollHeight;
     }
+}
+
+const BOMBA_ASCII = [
+    "        __  ",
+    "    _  |  |_",
+    "   | |_/\\_| |",
+    "   |    _   |",
+    "   |_  ( )  |",
+    "    |_|   |_|",
+    "     |___|",
+    "    __|_|__",
+    "   /       \\",
+    "  |  x   x  |",
+    "  |    _    |",
+    "   \\_______/",
+    "      | |",
+    "     _| |_",
+    "    |_____|",
+];
+
+const EXPLOSION_ASCII = [
+    "             ",
+    "    .         ",
+    "   ,|,     ",
+    "  .;*;.    ",
+    "   ;*;     ",
+    "  ,/|\\,    ",
+    " .';*;'.   ",
+    "  ;***;    ",
+    " ,/|||\\,   ",
+    ".;*****;.  ",
+];
+
+function activarAutodestruct() {
+    const overlay = document.createElement('div');
+    overlay.id = 'autodestruct-overlay';
+    overlay.innerHTML = `
+        <div id="autodestruct-contenido">
+            <div id="autodestruct-bomba"></div>
+            <div id="autodestruct-timer">3</div>
+            <div id="autodestruct-label">AUTODESTRUCCION</div>
+        </div>
+        <div id="autodestruct-restos"></div>
+    `;
+    document.body.appendChild(overlay);
+
+    const bombaEl = document.getElementById('autodestruct-bomba');
+    const timerEl = document.getElementById('autodestruct-timer');
+    const labelEl = document.getElementById('autodestruct-label');
+    let countdown = 3;
+
+    function renderBomba() {
+        bombaEl.textContent = BOMBA_ASCII.join('\n');
+    }
+
+    function animarExplosion() {
+        bombaEl.textContent = EXPLOSION_ASCII.join('\n');
+        bombaEl.className = 'explosion-frame';
+        timerEl.style.display = 'none';
+        labelEl.textContent = 'BOOOOOOOM';
+
+        const restos = document.getElementById('autodestruct-restos');
+        for (let i = 0; i < 30; i++) {
+            const fragmento = document.createElement('div');
+            fragmento.className = 'resto';
+            fragmento.style.setProperty('--x', (Math.random() * 100) + '%');
+            fragmento.style.setProperty('--y', (Math.random() * 100) + '%');
+            fragmento.style.setProperty('--r', (Math.random() * 720) + 'deg');
+            fragmento.style.setProperty('--s', (0.3 + Math.random() * 0.7) + 's');
+            fragmento.style.setProperty('--d', (Math.random() * 300) + 'ms');
+            restos.appendChild(fragmento);
+        }
+
+        setTimeout(() => {
+            overlay.className = 'destruido';
+            setTimeout(() => {
+                document.querySelectorAll('.mensaje-fila').forEach(el => el.remove());
+                const historial = document.getElementById('historial-mensajes');
+                const welcome = document.getElementById('welcome-screen');
+                if (welcome) {
+                    welcome.style.display = 'flex';
+                } else {
+                    const nuevoWelcome = document.createElement('div');
+                    nuevoWelcome.id = 'welcome-screen';
+                    nuevoWelcome.className = 'bienvenida-ia-bloque';
+                    nuevoWelcome.innerHTML = '<img src="/static/Logo.png" alt="Agente Clima" class="sol-logo-grande"><h1>Agente-Clima</h1>';
+                    historial.prepend(nuevoWelcome);
+                }
+                overlay.remove();
+            }, 1500);
+        }, 1000);
+    }
+
+    function tick() {
+        timerEl.textContent = countdown;
+        if (countdown === 0) {
+            animarExplosion();
+            return;
+        }
+        bombaEl.style.animation = 'shake 0.3s ease-in-out';
+        setTimeout(() => { bombaEl.style.animation = ''; }, 300);
+        countdown--;
+        setTimeout(tick, 1000);
+    }
+
+    renderBomba();
+    setTimeout(tick, 500);
 }
