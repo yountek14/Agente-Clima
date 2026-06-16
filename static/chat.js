@@ -1,4 +1,9 @@
 const SESSION_CHAT_ID = "session_" + Math.random().toString(36).substring(2, 11);
+let autodestructActivo = false;
+let timeoutsAutodestruct = [];
+let cancelarGeneracion = false;
+let timeoutTipeoActual = null;
+let generandoRespuesta = false;
 
 // --- LÓGICA DE ANIMACIÓN DEL SPRITE ---
 const spriteImage = new Image();
@@ -94,6 +99,45 @@ function animationLoop(timestamp) {
 requestAnimationFrame(animationLoop);
 // --- FIN LÓGICA DE ANIMACIÓN ---
 
+// --- CONVERSIÓN DE NÚMEROS A PALABRAS (ESPAÑOL) ---
+function numeroAPalabras(num) {
+    const unidades = ['cero', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve',
+                      'diez', 'once', 'doce', 'trece', 'catorce', 'quince'];
+    const especiales = ['dieciséis', 'diecisiete', 'dieciocho', 'diecinueve'];
+    const veintis = ['veinte', 'veintiuno', 'veintidós', 'veintitrés', 'veinticuatro',
+                     'veinticinco', 'veintiséis', 'veintisiete', 'veintiocho', 'veintinueve'];
+    const decenas = ['', 'diez', 'veinte', 'treinta', 'cuarenta', 'cincuenta',
+                     'sesenta', 'setenta', 'ochenta', 'noventa'];
+
+    let signo = '';
+    if (num < 0) { signo = 'menos '; num = Math.abs(num); }
+
+    if (!Number.isInteger(num)) {
+        const [entero, decimal] = num.toString().split('.');
+        const decPalabras = decimal.split('').map(d => unidades[parseInt(d)]).join(' ');
+        return signo + numeroAPalabras(parseInt(entero)) + ' punto ' + decPalabras;
+    }
+
+    if (num === 100) return signo + 'cien';
+    if (num > 100 && num < 200) return signo + 'ciento ' + numeroAPalabras(num - 100);
+    if (num >= 200 && num < 1000) {
+        const c = Math.floor(num / 100);
+        const centenas = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos',
+                          'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+        const resto = num % 100;
+        return signo + centenas[c] + (resto > 0 ? ' ' + numeroAPalabras(resto) : '');
+    }
+
+    if (num <= 15) return signo + unidades[num];
+    if (num < 20) return signo + especiales[num - 16];
+    if (num < 30) return signo + veintis[num - 20];
+
+    const d = Math.floor(num / 10);
+    const u = num % 10;
+    if (u === 0) return signo + decenas[d];
+    return signo + decenas[d] + ' y ' + unidades[u];
+}
+
 // --- FUNCIÓN PARA REPRODUCIR VOZ HUMANA (EDGE TTS) ---
 window.reproducirVozHumana = async function(btnElement, animatorIndex) {
     if (btnElement.classList.contains('cargando-voz')) return;
@@ -110,8 +154,18 @@ window.reproducirVozHumana = async function(btnElement, animatorIndex) {
             .replace(/\p{Emoji}/gu, '')
             .replace(/\*\*/g, '')
             .replace(/\*/g, '')
+            .replace(/(\d+)\s*°C/g, '$1 grados Celsius')
+            .replace(/(\d+)\s*°F/g, '$1 grados Fahrenheit')
+            .replace(/(\d+)\s*%/g, '$1 por ciento')
+            .replace(/(\d+)\s*km\/h/g, '$1 kilómetros por hora')
+            .replace(/(\d+)\s*mm/g, '$1 milímetros')
+            .replace(/(\d+)\s*m\/s/g, '$1 metros por segundo')
+            .replace(/-?\d+(?:\.\d+)?/g, m => numeroAPalabras(parseFloat(m)))
             .replace(/\s+/g, ' ')
             .trim();
+
+        console.log('[TTS DEBUG] Texto original:', textoCrudo);
+        console.log('[TTS DEBUG] Texto limpio:', textoLimpio);
 
         const res = await fetch('/api/tts', {
             method: 'POST',
@@ -150,19 +204,24 @@ function escribirProgresivamente(elemento, texto, velocidad = 18) {
         let i = 0;
         let isBold = false;
         let currentHTML = "";
+        let cancelado = false;
         
         function tipear() {
+            if (cancelarGeneracion) {
+                cancelado = true;
+                if (timeoutTipeoActual) clearTimeout(timeoutTipeoActual);
+                resolve(cancelado);
+                return;
+            }
             if (i < texto.length) {
-                // Detectar sintaxis Markdown para negrita (**texto**)
                 if (texto.substring(i, i + 2) === '**') {
                     isBold = !isBold;
                     currentHTML += isBold ? '<strong>' : '</strong>';
                     i += 2;
-                    tipear(); // Avanzar instantáneamente sin delay
+                    tipear();
                     return;
                 }
                 
-                // Escapar caracteres y convertir saltos de línea para innerHTML
                 let char = texto.charAt(i);
                 if (char === '\n') {
                     currentHTML += '<br>';
@@ -174,15 +233,14 @@ function escribirProgresivamente(elemento, texto, velocidad = 18) {
                     currentHTML += char;
                 }
                 
-                // Si la etiqueta strong está abierta, la cerramos virtualmente para que el navegador no se rompa
                 elemento.innerHTML = currentHTML + (isBold ? '</strong>' : '');
                 
                 i++;
                 const contenedor = document.getElementById('historial-mensajes');
                 if (contenedor) contenedor.scrollTop = contenedor.scrollHeight;
-                setTimeout(tipear, velocidad);
+                timeoutTipeoActual = setTimeout(tipear, velocidad);
             } else {
-                resolve();
+                resolve(cancelado);
             }
         }
         tipear();
@@ -190,9 +248,11 @@ function escribirProgresivamente(elemento, texto, velocidad = 18) {
 }
 
 async function enviarMensajeChat() {
+    if (generandoRespuesta) return;
     const inputElement = document.getElementById('input-mensaje-usuario');
     const historial = document.getElementById('historial-mensajes');
 
+    if (autodestructActivo) return;
     if (!inputElement || !inputElement.value.trim()) return;
 
     const welcome = document.getElementById('welcome-screen');
@@ -219,6 +279,7 @@ async function enviarMensajeChat() {
     historial.scrollTop = historial.scrollHeight;
 
     inputElement.disabled = true;
+    generandoRespuesta = true;
 
     const comunaActivaId = window.comunaSeleccionadaGlobal || "puerto-montt";
 
@@ -238,6 +299,19 @@ async function enviarMensajeChat() {
 
         if (data.autodestruct) {
             activarAutodestruct();
+            inputElement.disabled = false;
+            return;
+        }
+
+        if (data.autodestruct_cancelado) {
+            const burbujaIA = document.createElement('div');
+            burbujaIA.className = "mensaje mensaje-ia";
+            burbujaIA.textContent = data.respuesta;
+            const filaIA = document.createElement('div');
+            filaIA.className = "mensaje-fila agente";
+            filaIA.appendChild(burbujaIA);
+            document.getElementById('historial-mensajes').appendChild(filaIA);
+            document.getElementById('historial-mensajes').scrollTop = document.getElementById('historial-mensajes').scrollHeight;
             inputElement.disabled = false;
             return;
         }
@@ -274,9 +348,34 @@ async function enviarMensajeChat() {
         filaIA.appendChild(columnaIA);
         historial.appendChild(filaIA);
 
+        const iconosDerecha = document.getElementById('iconos-input-derecha');
+        const iconoMicrofono = document.getElementById('icono-microfono');
+        const iconoEnviar = document.getElementById('icono-enviar');
+
+        const btnDetener = document.createElement('span');
+        btnDetener.className = "btn-detener-generacion";
+        btnDetener.title = "Detener respuesta";
+        btnDetener.textContent = "✕";
+
+        if (iconosDerecha && iconoMicrofono && iconoEnviar) {
+            iconoMicrofono.style.display = 'none';
+            iconoEnviar.style.display = 'none';
+            iconosDerecha.appendChild(btnDetener);
+        }
+
+        cancelarGeneracion = false;
         animator.setState('talk');
-        await escribirProgresivamente(burbujaIA, data.respuesta);
+
+        btnDetener.addEventListener('click', () => {
+            cancelarGeneracion = true;
+        });
+
+        const fueCancelado = await escribirProgresivamente(burbujaIA, data.respuesta);
         animator.setState('idle');
+
+        if (fueCancelado) {
+            burbujaIA.innerHTML += ' <em style="opacity:0.5;font-size:0.85em;">[cancelado]</em>';
+        }
 
         const animatorIndex = activeAnimators.length - 1; // El índice del animador actual
 
@@ -314,6 +413,15 @@ async function enviarMensajeChat() {
         nodoError.textContent = "❌ " + detalles;
         historial.appendChild(nodoError);
     } finally {
+        cancelarGeneracion = false;
+        if (timeoutTipeoActual) clearTimeout(timeoutTipeoActual);
+        generandoRespuesta = false;
+        const btnDetener = document.querySelector('.btn-detener-generacion');
+        if (btnDetener && btnDetener.parentNode) btnDetener.remove();
+        const iconoMicrofono = document.getElementById('icono-microfono');
+        const iconoEnviar = document.getElementById('icono-enviar');
+        if (iconoMicrofono) iconoMicrofono.style.display = '';
+        if (iconoEnviar) iconoEnviar.style.display = '';
         inputElement.disabled = false;
         inputElement.focus();
         historial.scrollTop = historial.scrollHeight;
@@ -352,6 +460,9 @@ const EXPLOSION_ASCII = [
 ];
 
 function activarAutodestruct() {
+    if (autodestructActivo) return;
+    autodestructActivo = true;
+
     const overlay = document.createElement('div');
     overlay.id = 'autodestruct-overlay';
     overlay.innerHTML = `
@@ -359,6 +470,7 @@ function activarAutodestruct() {
             <div id="autodestruct-bomba"></div>
             <div id="autodestruct-timer">3</div>
             <div id="autodestruct-label">AUTODESTRUCCION</div>
+            <div id="autodestruct-cancel-hint">Presiona ESC o haz clic para cancelar</div>
         </div>
         <div id="autodestruct-restos"></div>
     `;
@@ -367,17 +479,35 @@ function activarAutodestruct() {
     const bombaEl = document.getElementById('autodestruct-bomba');
     const timerEl = document.getElementById('autodestruct-timer');
     const labelEl = document.getElementById('autodestruct-label');
+    const hintEl = document.getElementById('autodestruct-cancel-hint');
     let countdown = 3;
+    timeoutsAutodestruct = [];
+
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay || e.target === hintEl) {
+            cancelarAutodestruct();
+        }
+    });
+
+    function onKeyDown(e) {
+        if (e.key === 'Escape') {
+            cancelarAutodestruct();
+        }
+    }
+    document.addEventListener('keydown', onKeyDown);
 
     function renderBomba() {
         bombaEl.textContent = BOMBA_ASCII.join('\n');
     }
 
     function animarExplosion() {
+        autodestructActivo = false;
+        document.removeEventListener('keydown', onKeyDown);
         bombaEl.textContent = EXPLOSION_ASCII.join('\n');
         bombaEl.className = 'explosion-frame';
         timerEl.style.display = 'none';
         labelEl.textContent = 'BOOOOOOOM';
+        if (hintEl) hintEl.style.display = 'none';
 
         const restos = document.getElementById('autodestruct-restos');
         for (let i = 0; i < 30; i++) {
@@ -391,9 +521,9 @@ function activarAutodestruct() {
             restos.appendChild(fragmento);
         }
 
-        setTimeout(() => {
+        const t1 = setTimeout(() => {
             overlay.className = 'destruido';
-            setTimeout(() => {
+            const t2 = setTimeout(() => {
                 document.querySelectorAll('.mensaje-fila').forEach(el => el.remove());
                 const historial = document.getElementById('historial-mensajes');
                 const welcome = document.getElementById('welcome-screen');
@@ -408,7 +538,9 @@ function activarAutodestruct() {
                 }
                 overlay.remove();
             }, 1500);
+            timeoutsAutodestruct.push(t2);
         }, 1000);
+        timeoutsAutodestruct.push(t1);
     }
 
     function tick() {
@@ -418,11 +550,33 @@ function activarAutodestruct() {
             return;
         }
         bombaEl.style.animation = 'shake 0.3s ease-in-out';
-        setTimeout(() => { bombaEl.style.animation = ''; }, 300);
+        const tShake = setTimeout(() => { bombaEl.style.animation = ''; }, 300);
+        timeoutsAutodestruct.push(tShake);
         countdown--;
-        setTimeout(tick, 1000);
+        const tTick = setTimeout(tick, 1000);
+        timeoutsAutodestruct.push(tTick);
     }
 
     renderBomba();
-    setTimeout(tick, 500);
+    const tStart = setTimeout(tick, 500);
+    timeoutsAutodestruct.push(tStart);
+}
+
+function cancelarAutodestruct() {
+    if (!autodestructActivo) return;
+    autodestructActivo = false;
+
+    timeoutsAutodestruct.forEach(t => clearTimeout(t));
+    timeoutsAutodestruct = [];
+
+    const overlay = document.getElementById('autodestruct-overlay');
+    if (overlay) {
+        overlay.classList.add('cancelando');
+        setTimeout(() => {
+            if (overlay.parentNode) overlay.remove();
+        }, 400);
+    }
+
+    const inputElement = document.getElementById('input-mensaje');
+    if (inputElement) inputElement.disabled = false;
 }

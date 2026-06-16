@@ -112,6 +112,7 @@ body {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+    overflow-x: hidden;
     padding-right: 10px;
     display: flex;
     flex-direction: column;
@@ -159,6 +160,7 @@ body {
     align-items: flex-end;
     gap: 12px;
     max-width: 85%;
+    min-width: 0;
 }
 .mensaje-fila.usuario {
     align-self: flex-end;
@@ -196,6 +198,8 @@ body {
     color: #000000;
     line-height: 1.4;
     font-weight: 500;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 .mensaje-ia {
     background: #EBCF7C;
@@ -221,6 +225,31 @@ body {
 }
 .herramientas-msg span:hover {
     opacity: 1;
+}
+
+.btn-detener-generacion {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #FF597B;
+    border: 2px solid #000000;
+    font-size: 14px;
+    font-weight: 700;
+    color: #000;
+    transition: transform 0.15s;
+    user-select: none;
+    animation: pulse-deten 1.2s ease-in-out infinite;
+}
+.btn-detener-generacion:active {
+    transform: scale(0.92);
+}
+@keyframes pulse-deten {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,89,123,0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(255,89,123,0); }
 }
 
 /* ============ INPUT DE CHAT ============ */
@@ -298,6 +327,7 @@ body {
     padding: 6px 0 6px 14px;
     border-left: 4px solid #7E7E7E;
     min-height: 0;
+    overflow-x: hidden;
 }
 .panel-clima-derecho h3 {
     font-size: 16px;
@@ -528,6 +558,19 @@ body {
     margin-top: 10px;
     text-shadow: 0 0 10px rgba(255,68,68,0.5);
 }
+#autodestruct-cancel-hint {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #884444;
+    margin-top: 20px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    animation: pulse-hint 2s ease-in-out infinite;
+}
+#autodestruct-overlay.cancelando {
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+}
 #autodestruct-restos {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -569,6 +612,11 @@ body {
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.1); }
+}
+
+@keyframes pulse-hint {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
 }
 
 @keyframes explotar {
