@@ -37,6 +37,9 @@ CACHE_CLIMA = {}       # Guarda datos de Open-Meteo por comuna_id para evitar sa
 HISTORIAL_CHAT = {}    # Guarda los mensajes del chat indexados por session_id (Memoria Efímera)
 METRICAS_HTTP = []     # Métricas de requests HTTP
 VIOLACIONES_POR_SESION = {}  # Contador de violaciones de seguridad para autodestruct
+TOKEN_BUDGET_POR_SESION = {}  # Contador acumulativo de tokens por sesión (prompt + completion)
+MAX_MENSAJES_HISTORIAL = 20   # Máximo de mensajes (human + ai) en el historial de chat (10 intercambios)
+TOKEN_BUDGET_MAX = 50000      # Presupuesto máximo de tokens por sesión
 
 # Inicialización segura del Agente Meteorológico de Inteligencia Artificial
 try:
@@ -170,6 +173,23 @@ def api_chat():
     
     if not session_id or not mensaje_usuario or not comuna_id:
         return jsonify({"error": "Faltan parámetros críticos obligatorios: session_id, mensaje o comuna_id."}), 400
+
+    # --- EASTER EGG: Activar/desactivar autodestruct por chat ---
+    PALABRAS_ACTIVAR = ["!boom", "/boom", "activar autodestruct", "activar explosión",
+                        "activar explosion", "explosión!", "explosion!", "boom!",
+                        "detonar", "autodestrucción", "autodestruccion"]
+    PALABRAS_CANCELAR = ["!noboom", "/noboom", "cancelar autodestruct",
+                         "desactivar autodestruct", "desactivar explosión",
+                         "abortar autodestruct", "cancelar explosión"]
+
+    msg_lower = mensaje_usuario.lower()
+    if any(p in msg_lower for p in PALABRAS_ACTIVAR):
+        logger.info("autodestruct_activado_por_comando", session_id=session_id)
+        return jsonify({"autodestruct": True})
+    if any(p in msg_lower for p in PALABRAS_CANCELAR):
+        VIOLACIONES_POR_SESION[session_id] = 0
+        logger.info("autodestruct_cancelado_por_comando", session_id=session_id)
+        return jsonify({"respuesta": "🔒 Autodestruct desactivado. Contador de violaciones reiniciado.", "autodestruct_cancelado": True})
 
     # --- SEGURIDAD: Contador de violaciones ---
     def _violacion(mensaje_error):
@@ -305,6 +325,20 @@ def api_chat():
         # Registrar y persistir secuencialmente el intercambio de mensajes en la memoria de Flask
         HISTORIAL_CHAT[session_id].append({"role": "human", "content": mensaje_usuario})
         HISTORIAL_CHAT[session_id].append({"role": "ai", "content": contenido_respuesta})
+
+        # --- DEFENSA: Ventana deslizante del historial (previene crecimiento ilimitado) ---
+        while len(HISTORIAL_CHAT[session_id]) > MAX_MENSAJES_HISTORIAL:
+            HISTORIAL_CHAT[session_id].pop(0)
+
+        # --- DEFENSA: Presupuesto de tokens por sesión ---
+        tokens_gastados = tokens_prompt + tokens_completion
+        TOKEN_BUDGET_POR_SESION[session_id] = TOKEN_BUDGET_POR_SESION.get(session_id, 0) + tokens_gastados
+        if TOKEN_BUDGET_POR_SESION[session_id] > TOKEN_BUDGET_MAX:
+            logger.warning("token_budget_excedido", session_id=session_id,
+                           tokens_acumulados=TOKEN_BUDGET_POR_SESION[session_id])
+            HISTORIAL_CHAT[session_id] = []
+            TOKEN_BUDGET_POR_SESION[session_id] = 0
+            contenido_respuesta += "\n\n⚠️ Has alcanzado el límite de tokens de esta sesión. El historial ha sido reiniciado."
 
         sistema_trazas.finalizar_span(span_chat)
         sistema_trazas.finalizar_traza()

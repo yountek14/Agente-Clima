@@ -12,3 +12,6 @@ __pycache__/
 
 # Archivos de datos locales (Historial del agente)
 memoria/historial_reportes.json
+
+# Documentos externos
+*.pdf

@@ -5,6 +5,8 @@ from typing import Type, Optional
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
 
+MAX_REPORTES_POR_CIUDAD = 50
+
 # 1. Definimos los esquemas de entrada usando Pydantic
 class GuardarReporteInput(BaseModel):
     fecha: str = Field(description="Fecha del reporte en formato YYYY-MM-DD")
@@ -46,6 +48,9 @@ class GuardarReporteTool(BaseTool):
             # Agregar el nuevo registro
             nuevo_registro = {"fecha": fecha, "datos": datos}
             historial[ciudad].append(nuevo_registro)
+
+            if len(historial[ciudad]) > MAX_REPORTES_POR_CIUDAD:
+                historial[ciudad] = historial[ciudad][-MAX_REPORTES_POR_CIUDAD:]
 
             # Guardar en disco
             with open(self.ruta_historial, "w", encoding="utf-8") as f:

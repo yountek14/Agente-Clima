@@ -1,0 +1,212 @@
+================================================================================
+REPORTE DE SESION - AGENTE CLIMA
+Fecha: 16/06/2026
+================================================================================
+
+RESUMEN
+-------
+Sesion enfocada en hardening de seguridad, mejoras de UX, correccion de bugs,
+y planificacion de nueva funcionalidad de geolocalizacion movil.
+
+
+================================================================================
+1. EASTER EGG: AUTODESTRUCT TOGGLEABLE POR CHAT
+================================================================================
+
+Archivos modificados:
+- app.py (lineas 174-189)
+- static/chat.js (lineas 1-6, 419-562)
+- static/style.css (lineas 531-545, 587-592)
+
+Que hace:
+- Comandos de chat para activar explosion manualmente:
+  !boom, /boom, boom!, explosión!, detonar, activar autodestruct
+- Comandos para cancelar/desactivar:
+  !noboom, /noboom, cancelar autodestruct, desactivar autodestruct
+- Durante la cuenta regresiva se puede cancelar con ESC o clic en el overlay
+- Flag autodestructActivo previene re-entrada
+- Timeouts almacenados en array para cancelacion limpia
+- El hint "Presiona ESC o haz clic para cancelar" tiene animacion pulse-hint
+
+
+================================================================================
+2. DEFENSAS CONTRA ATAQUES DE GASTO DE TOKENS (5 fixes)
+================================================================================
+
+Analisis previo revelo 5 vulnerabilidades criticas. Todas corregidas.
+
+Fix 1: max_tokens=1024 en agente.py:34
+- ChatOpenAI no tenia limite de tokens de salida
+- El LLM podia generar respuestas arbitrariamente largas
+- Ahora limitado a 1024 tokens de completion
+
+Fix 2: Ventana deslizante del historial en app.py:329-331
+- HISTORIAL_CHAT crecia sin limite por sesion
+- Todo el historial se enviaba al LLM en cada peticion
+- Ahora maximo 20 mensajes (10 intercambios), elimina los mas antiguos
+- Constante: MAX_MENSAJES_HISTORIAL = 20
+
+Fix 3: Presupuesto de tokens por sesion en app.py:333-341
+- Sin tope de gasto acumulativo, el coste podia dispararse
+- Ahora maximo 50,000 tokens acumulados por sesion
+- Al exceder: reinicia historial y notifica al usuario
+- Constante: TOKEN_BUDGET_MAX = 50000
+- Tracking: TOKEN_BUDGET_POR_SESION dict
+
+Fix 4: maxlength="2000" en index.html:39
+- El input del chat no tenia limite en el frontend
+- Ahora el navegador trunca automaticamente a 2000 caracteres
+- Capa extra ademas del backend ValidadorEntrada
+
+Fix 5: Truncado de historial persistente en historial.py:52-53
+- historial_reportes.json crecia sin limite por ciudad
+- Ahora maximo 50 reportes guardados por ciudad
+- Constante: MAX_REPORTES_POR_CIUDAD = 50
+
+
+================================================================================
+3. FIX: OVERFLOW HORIZONTAL DE MENSAJES LARGOS
+================================================================================
+
+Archivo modificado: static/style.css
+
+Problema:
+- Strings largos sin espacios (ej: "AAAAAAA...") expandian el bubble
+- La columna central empujaba el panel de pronostico fuera del viewport
+- .dashboard-container tenia overflow:hidden, cortaba el panel derecho
+
+Solucion (4 selectores):
+- .mensaje: overflow-wrap: break-word; word-break: break-word;
+- .scroll-burbujas-chat: overflow-x: hidden;
+- .mensaje-fila: min-width: 0;
+- .panel-clima-derecho: overflow-x: hidden;
+
+
+================================================================================
+4. BOTON PARA CANCELAR RESPUESTA DEL AGENTE
+================================================================================
+
+Archivos modificados:
+- static/chat.js
+- static/style.css
+
+Primera version:
+- Boton "x" sutil debajo del bubble IA durante generacion
+- Al hacer clic, detenia el typing effect y marcaba [cancelado]
+
+Segunda version (rediseno):
+- El boton de cancelar REEMPLAZA los botones de enviar (>>) y microfono
+  en la barra de input mientras el agente genera
+- Circulo rojo con "x" que pulsa, mismo tamano que los iconos originales
+- Al finalizar (normal o cancelado), vuelven los botones originales
+- CSS: .btn-detener-generacion con animacion pulse-deten
+
+Tercera version (bugfix):
+- Bug: clearTimeout mataba el proximo tipear(), la promesa nunca resolvia,
+  el await colgaba para siempre, el boton no desaparecia
+- Fix: removido clearTimeout del click handler, solo se usa la flag
+  cancelarGeneracion que tipear() verifica al inicio de cada iteracion
+- Bug: limpieza duplicada en try + finally
+- Fix: limpieza unificada solo en finally
+- Bug: re-entrada posible (clic en sugerencia durante generacion)
+- Fix: flag generandoRespuesta, reseteada en finally
+- Variables globales nuevas: cancelarGeneracion, timeoutTipeoActual,
+  generandoRespuesta
+
+
+================================================================================
+5. PRUEBAS DE SEGURIDAD
+================================================================================
+
+Se generaron mensajes de prueba para verificar las 5 capas de seguridad:
+- Inyeccion de prompt (11 variantes, incluyendo obfuscacion)
+- Deteccion de PII (email, telefono, RUT, tarjeta de credito)
+- Inyeccion de codigo (script, eval, exec, subprocess, os.system)
+- Filtro etico (violencia, contenido ilegal, manipulacion)
+- Edge cases (falsos positivos que no deberian bloquearse)
+
+
+================================================================================
+6. PLANIFICACION: GEOLOCALIZACION MOVIL
+================================================================================
+
+Archivo creado: planificacion_ubicacion_movil.txt
+
+Feature planificada (sin implementar aun):
+- Detectar ubicacion del usuario via navigator.geolocation (API nativa)
+- Nuevo endpoint POST /api/geolocalizar en app.py
+- Calculo de distancia haversine contra las 15 comunas
+- Auto-seleccion de la comuna mas cercana (< 100km de radio)
+- Boton "<<>>" para reintento manual
+- Sin dependencias externas (sin Google Maps API)
+- ~60 lineas de codigo estimadas en 3 archivos
+
+
+================================================================================
+RESUMEN DE ARCHIVOS MODIFICADOS
+================================================================================
+
+app.py:
+  + lineas 40-42: TOKEN_BUDGET_POR_SESION, MAX_MENSAJES_HISTORIAL, TOKEN_BUDGET_MAX
+  + lineas 174-189: Easter egg magic words (activar/cancelar autodestruct)
+  + lineas 329-341: Ventana deslizante + presupuesto de tokens
+
+agente.py:
+  * linea 34: max_tokens=1024 (antes sin limite)
+
+herramientas/historial.py:
+  + linea 7: MAX_REPORTES_POR_CIUDAD = 50
+  + lineas 52-53: Truncado de historial persistente
+
+templates/index.html:
+  * linea 39: maxlength="2000" anadido al input
+  + lineas 40-43: IDs iconos-input-derecha, icono-microfono, icono-enviar
+
+static/style.css:
+  * linea 114: overflow-x: hidden en .scroll-burbujas-chat
+  * linea 162: min-width: 0 en .mensaje-fila
+  + lineas 199-200: overflow-wrap + word-break en .mensaje
+  * linea 301: overflow-x: hidden en .panel-clima-derecho
+  * lineas 231-249: .btn-detener-generacion (reemplaza .btn-cancelar-generacion)
+  + lineas 531-545: #autodestruct-cancel-hint + .cancelando
+  + lineas 587-592: @keyframes pulse-hint + @keyframes pulse-deten
+
+static/chat.js:
+  + lineas 4-6: Variables globales (cancelarGeneracion, timeoutTipeoActual,
+    generandoRespuesta)
+  * lineas 206-215: escribirProgresivamente() soporta cancelacion
+  * linea 251: Guard re-entry con generandoRespuesta
+  * linea 282: generandoRespuesta = true al iniciar
+  * lineas 344-378: Boton detener en input (reemplaza boton bajo bubble)
+  * lineas 417-429: finally unificado con limpieza de btnDetener + flags
+  * lineas 419-539: activarAutodestruct() cancelable + cancelarAutodestruct()
+  * lineas 291-308: Manejo de data.autodestruct_cancelado
+
+Archivos creados:
+  + planificacion_ubicacion_movil.txt
+
+
+================================================================================
+ESTADO FINAL DEL PROYECTO
+================================================================================
+
+Seguridad:
+  [x] Rate limiting: 30 req/60s por sesion
+  [x] Validacion de entrada: inyeccion, PII, longitud, codigo
+  [x] Filtro etico: violencia, contenido ilegal, manipulacion
+  [x] Sanitizacion de salida: PII en respuestas del LLM
+  [x] Auto-destruccion tras 3 violaciones (ahora toggleable por chat)
+  [x] max_tokens=1024 en LLM
+  [x] Ventana deslizante de historial (20 mensajes max)
+  [x] Presupuesto de tokens por sesion (50,000 max)
+  [x] maxlength en frontend (2000 chars)
+
+UX:
+  [x] Texto largo no rompe el layout (word-break)
+  [x] Boton para cancelar respuesta del agente en barra de input
+  [x] Easter egg de explosion toggleable con comandos de chat
+  [x] Cancelacion de autodestruct con ESC o clic
+
+Pendiente (planificado):
+  [ ] Geolocalizacion automatica para moviles
+================================================================================

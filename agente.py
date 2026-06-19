@@ -30,7 +30,8 @@ class AgenteMeteorologicoSimple:
             model="gpt-4o",
             openai_api_base=os.getenv("OPENAI_BASE_URL", "https://models.inference.ai.azure.com"),
             openai_api_key=os.getenv("GITHUB_TOKEN"),
-            temperature=0.2
+            temperature=0.2,
+            max_tokens=1024
         ).bind_tools([
             ConsultarClimaTool(),
             GuardarReporteTool(),
