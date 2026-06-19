@@ -18,14 +18,42 @@ CATEGORIAS_RESTRINGIDAS = {
     "violencia": [
         "hackear", "atacar", "explotar vulnerabilidad", "destruir",
         "arma", "bomba", "daño físico", "violencia",
+        "hack", "attack", "exploit", "destroy", "weapon",
+        "bomb", "physical harm", "violence", "hacker",
+        "pirater", "attaquer", "exploiter", "détruire",
+        "arme", "bombe", "dommage physique",
+        "hackear", "atacar", "explorar vulnerabilidade", "destruir",
+        "bomba", "dano físico", "violência",
+        "hacken", "angreifen", "zerstören", "waffe",
+        "bombe", "körperlicher schaden", "gewalt",
+        "hackerare", "attaccare", "distruggere", "arma",
+        "bomba", "danno fisico", "violenza",
     ],
     "contenido_ilegal": [
         "robar datos", "suplantar identidad", "falsificar",
         "evadir impuestos", "lavado de dinero", "tráfico",
+        "steal data", "impersonate", "forge", "forgery",
+        "evade tax", "money laundering", "trafficking",
+        "falsify", "identity theft", "tax evasion",
+        "voler des données", "usurper", "falsifier",
+        "fraude fiscale", "blanchir", "trafic",
+        "falsificar documentos", "sonegar impostos",
+        "roubar dados", "suplantar",
+        "stehlen daten", "fälschen", "geldwäsche",
+        "rubare dati", "falsificare", "riciclaggio",
     ],
     "manipulacion": [
         "manipular personas", "engaño masivo", "desinformación",
         "propaganda", "deepfake dañino",
+        "manipulate people", "mass deception", "disinformation",
+        "propaganda", "harmful deepfake", "fake news",
+        "manipuler", "désinformation", "tromperie massive",
+        "propagande", "deepfake nuisible",
+        "manipular pessoas", "desinformação", "engano em massa",
+        "propaganda", "notícias falsas",
+        "manipulieren", "desinformation", "massenbetrug",
+        "manipolare", "disinformazione", "inganno di massa",
+        "deepfake dannoso",
     ],
 }
 
@@ -183,10 +211,19 @@ class SanitizadorSalida:
         "tarjeta_credito": r"\b(?:\d{4}[-\s]?){3}\d{4}\b",
     }
 
+    _regex_cache: dict[str, re.Pattern] = {}
+
+    @classmethod
+    def _compilar_patrones(cls):
+        if not cls._regex_cache:
+            for tipo, patron in cls.PATRONES_PII_SALIDA.items():
+                cls._regex_cache[tipo] = re.compile(patron)
+
     def verificar_pii(self, texto: str) -> ResultadoValidacion:
+        self._compilar_patrones()
         pii = {}
-        for tipo, patron in self.PATRONES_PII_SALIDA.items():
-            coincidencias = re.findall(patron, texto)
+        for tipo, patron in self._regex_cache.items():
+            coincidencias = patron.findall(texto)
             if coincidencias:
                 pii[tipo] = len(coincidencias)
         if pii:
@@ -194,7 +231,8 @@ class SanitizadorSalida:
         return ResultadoValidacion(True, "Salida limpia")
 
     def sanitizar_pii(self, texto: str) -> str:
-        for tipo, patron in self.PATRONES_PII_SALIDA.items():
+        self._compilar_patrones()
+        for tipo, patron in self._regex_cache.items():
             texto = patron.sub(f"[{tipo.upper()}_REDACTADO]", texto)
         return texto
 
