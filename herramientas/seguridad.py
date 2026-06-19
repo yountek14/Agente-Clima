@@ -3,6 +3,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Optional, Dict, List
 
+from herramientas.detector_embedding import detector_embedding_global as detector_embedding
+
 
 @dataclass
 class ResultadoValidacion:
@@ -115,9 +117,19 @@ class ValidadorEntrada:
             "longitud": self.validar_longitud(texto),
             "contenido": self.validar_contenido(texto),
         }
-        es_seguro = all(r.es_valido for r in resultados.values())
+
+        emb_resultado = detector_embedding.evaluar(texto)
+        resultados["embedding"] = emb_resultado
+
+        es_seguro = all(
+            r.es_valido if hasattr(r, "es_valido") else r.es_seguro
+            for r in resultados.values()
+        )
         niveles = ["bajo", "medio", "alto", "critico"]
-        riesgo_maximo = max(resultados.values(), key=lambda r: niveles.index(r.riesgo)).riesgo
+        riesgo_maximo = max(
+            [r for r in resultados.values() if hasattr(r, "riesgo")],
+            key=lambda r: niveles.index(r.riesgo)
+        ).riesgo
         reporte = {"es_seguro": es_seguro, "riesgo_maximo": riesgo_maximo, "validaciones": resultados}
         self.historial.append(reporte)
         return reporte
