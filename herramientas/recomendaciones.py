@@ -5,7 +5,9 @@ from typing import Type, Optional
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
 
-RUTA_LUGARES = "memoria/lugares_recomendados.json"
+# Ruta absoluta basada en la ubicación del archivo
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RUTA_LUGARES = os.path.join(BASE_DIR, "datos", "lugares_recomendados.json")
 
 
 class ConsultarRecomendacionesInput(BaseModel):
@@ -25,7 +27,8 @@ NOMBRES_MES = {
 
 
 def obtener_horario() -> str:
-    hora = datetime.now().hour
+    from zoneinfo import ZoneInfo
+    hora = datetime.now(ZoneInfo("America/Santiago")).hour
     if hora < 12:
         return "mañana"
     elif hora < 19:
@@ -34,7 +37,8 @@ def obtener_horario() -> str:
 
 
 def obtener_mes_actual() -> int:
-    return datetime.now().month
+    from zoneinfo import ZoneInfo
+    return datetime.now(ZoneInfo("America/Santiago")).month
 
 
 class ConsultarRecomendacionesTool(BaseTool):

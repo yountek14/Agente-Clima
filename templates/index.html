@@ -17,10 +17,24 @@
             <nav class="enlaces-menu">
                 <button onclick="cambiarPestaña('chat')" id="btn-pestana-chat" class="item-link activo">Conversar IA</button>
                 <button onclick="cambiarPestaña('reporte')" id="btn-pestana-reporte" class="item-link">Generar reporte a mi correo</button>
-                <button class="item-link">Historial de reportes</button>
-                <button class="item-link">Quienes somos</button>
+                <a href="/historial" id="btn-historial" class="item-link" style="display:none; text-decoration:none;">Historial de reportes</a>
+                <a href="/quienes-somos" class="item-link" style="display:block; text-decoration:none;">Quiénes somos</a>
                 <a href="/metricas" class="item-link" style="display:block; text-decoration:none;">📊 Métricas</a>
             </nav>
+            <div class="menu-inferior-perfil">
+                <div id="perfil-no-logueado" class="perfil-seccion">
+                    <button onclick="mostrarModalLogin()" class="item-link btn-login-menu">
+                        <span class="avatar-menu-default">👤</span> Iniciar sesión
+                    </button>
+                </div>
+                <div id="perfil-logueado" class="perfil-seccion" style="display: none;">
+                    <a href="/perfil" class="item-link perfil-enlace" id="perfil-enlace-menu">
+                        <img id="avatar-menu-img" src="{{ url_for('static', filename='avatars/avatar_default.svg') }}" alt="Perfil" class="avatar-menu-img">
+                        <span id="nombre-usuario-menu">Usuario</span>
+                    </a>
+                    <button onclick="cerrarSesion()" class="item-link btn-logout-menu">Cerrar sesión</button>
+                </div>
+            </div>
         </aside>
 
         <main class="pantalla-central-borde">
@@ -32,6 +46,7 @@
                         <div id="welcome-screen" class="bienvenida-ia-bloque">
                             <img src="{{ url_for('static', filename='Logo.png') }}" alt="Agente Clima" class="sol-logo-grande">
                             <h1>Agente-Clima</h1>
+                            <p id="contador-visitante-msg" class="contador-visitante-msg"></p>
                         </div>
                     </div>
 
@@ -86,8 +101,85 @@
 
     </div>
 
+    <!-- MODAL DE LOGIN/REGISTRO -->
+    <div id="modal-auth" class="modal-auth-overlay" style="display: none;">
+        <div class="modal-auth-contenedor">
+            <button class="modal-auth-cerrar" onclick="cerrarModalAuth()">✕</button>
+            
+            <div class="modal-auth-logo">
+                <img src="{{ url_for('static', filename='Logo.png') }}" alt="Agente Clima">
+            </div>
+            
+            <h2 class="modal-auth-titulo" id="modal-auth-titulo">Iniciar sesión</h2>
+            <p class="modal-auth-subtitulo" id="modal-auth-subtitulo">Accede para seguir conversando</p>
+            
+            <!-- FORMULARIO DE LOGIN -->
+            <form id="form-login" class="modal-auth-form" onsubmit="event.preventDefault(); iniciarSesion();">
+                <div class="modal-campo">
+                    <label>Correo electrónico</label>
+                    <input type="email" id="login-email" required autocomplete="email" placeholder="tu@correo.com">
+                </div>
+                <div class="modal-campo">
+                    <label>Contraseña</label>
+                    <input type="password" id="login-password" required autocomplete="current-password" placeholder="••••••••">
+                </div>
+                <div id="login-error" class="modal-error"></div>
+                <button type="submit" class="btn-modal-principal">Iniciar sesión</button>
+            </form>
+            
+            <!-- FORMULARIO DE REGISTRO -->
+            <form id="form-registro" class="modal-auth-form" style="display: none;" onsubmit="event.preventDefault(); registrarUsuario();">
+                <div class="modal-campo">
+                    <label>Nombre</label>
+                    <input type="text" id="registro-nombre" required placeholder="Tu nombre">
+                </div>
+                <div class="modal-campo">
+                    <label>Correo electrónico</label>
+                    <input type="email" id="registro-email" required autocomplete="email" placeholder="tu@correo.com">
+                </div>
+                <div class="modal-campo">
+                    <label>Contraseña</label>
+                    <input type="password" id="registro-password" required autocomplete="new-password" placeholder="Mínimo 8 caracteres" minlength="8">
+                </div>
+                <div class="modal-campo">
+                    <label>Confirmar contraseña</label>
+                    <input type="password" id="registro-password-confirm" required autocomplete="new-password" placeholder="Repite la contraseña" minlength="8">
+                </div>
+                <div id="registro-error" class="modal-error"></div>
+                <button type="submit" class="btn-modal-principal">Crear cuenta</button>
+            </form>
+            
+            <div class="modal-auth-switch">
+                <span id="switch-a-registro">¿No tienes cuenta? <a href="#" onclick="event.preventDefault(); mostrarRegistro();">Regístrate</a></span>
+                <span id="switch-a-login" style="display: none;">¿Ya tienes cuenta? <a href="#" onclick="event.preventDefault(); mostrarLogin();">Inicia sesión</a></span>
+            </div>
+            
+            <button class="btn-modal-secundario" onclick="cerrarModalAuth()">Continuar como visitante</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE LÍMITE ALCANZADO -->
+    <div id="modal-limite" class="modal-auth-overlay" style="display: none;">
+        <div class="modal-auth-contenedor">
+            <div class="modal-auth-logo">
+                <img src="{{ url_for('static', filename='Logo.png') }}" alt="Agente Clima">
+            </div>
+            
+            <h2 class="modal-auth-titulo">¡Inicia sesión para seguir conversando!</h2>
+            <p class="modal-auth-subtitulo">Has usado tus <strong>4 consultas gratuitas</strong>.<br>Crea una cuenta para acceso ilimitado.</p>
+            
+            <div class="modal-auth-botones-dobles">
+                <button class="btn-modal-principal" onclick="cerrarModalLimite(); mostrarModalLogin();">Iniciar sesión</button>
+                <button class="btn-modal-principal" onclick="cerrarModalLimite(); mostrarModalRegistro();">Registrarse</button>
+            </div>
+            
+            <button class="btn-modal-secundario" onclick="cerrarModalLimite()">Entendido</button>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='pronostico.js') }}"></script>
     <script src="{{ url_for('static', filename='chat.js') }}"></script>
+    <script src="{{ url_for('static', filename='auth.js') }}"></script>
     <script src="{{ url_for('static', filename='app-main.js') }}"></script>
     <script>
         function setSugerenciaChat(texto) {

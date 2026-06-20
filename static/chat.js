@@ -316,6 +316,13 @@ async function enviarMensajeChat() {
             return;
         }
 
+        // Manejo de límite de consultas para visitantes
+        if (data.requiere_login) {
+            mostrarModalLimiteAlcanzado();
+            inputElement.disabled = false;
+            return;
+        }
+
         if (!respuesta.ok) {
             const msg = data && data.error ? data.error : "Error en la respuesta del agente";
             throw new Error(msg);

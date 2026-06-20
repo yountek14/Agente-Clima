@@ -10,8 +10,14 @@ __pycache__/
 # Editor
 .vscode/
 
-# Archivos de datos locales (Historial del agente)
-memoria/historial_reportes.json
+# Archivos de datos locales (Historial del agente y usuarios)
+datos/historial_reportes.json
+memoria/usuarios.json
+reportes/
+
+# Avatares subidos por usuarios (mantener solo el default)
+static/avatars/*
+!static/avatars/avatar_default.svg
 
 # Documentos externos
 *.pdf

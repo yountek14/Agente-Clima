@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Historial - Agente Clima</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .historial-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        .historial-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .historial-titulo {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .historial-subtitulo {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .historial-vacio {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 20px;
+        }
+        
+        .historial-vacio-icono {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .historial-vacio-titulo {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .historial-vacio-texto {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .historial-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .historial-item {
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.2s;
+        }
+        
+        .historial-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .historial-item-fecha {
+            text-align: center;
+            min-width: 80px;
+            padding: 10px;
+            background: #EBCF7C;
+            border: 2px solid #000;
+            border-radius: 12px;
+        }
+        
+        .historial-item-dia {
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .historial-item-mes {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #444;
+            margin-top: 4px;
+        }
+        
+        .historial-item-info {
+            flex: 1;
+        }
+        
+        .historial-item-comuna {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .historial-item-datos {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .historial-item-acciones {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .historial-btn {
+            padding: 10px 16px;
+            border: 2px solid #000;
+            border-radius: 15px;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .historial-btn:hover {
+            background: #000;
+            color: #fff;
+        }
+        
+        .historial-btn-primario {
+            background: #000;
+            color: #fff;
+        }
+        
+        .historial-btn-primario:hover {
+            background: #333;
+        }
+        
+        .historial-btn-volver {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #000;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: opacity 0.2s;
+        }
+        
+        .historial-btn-volver:hover {
+            opacity: 0.7;
+        }
+        
+        /* Modal para ver reporte */
+        .modal-reporte-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .modal-reporte-overlay.activo {
+            display: flex;
+        }
+        
+        .modal-reporte-contenedor {
+            background: #fff;
+            border: 4px solid #000;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-reporte-header {
+            padding: 15px 20px;
+            border-bottom: 2px solid #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-reporte-titulo {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .modal-reporte-cerrar {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .modal-reporte-iframe {
+            flex: 1;
+            border: none;
+            width: 100%;
+            min-height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div class="historial-container">
+        <a href="/" class="historial-btn-volver">← Volver al inicio</a>
+        
+        <div class="historial-header">
+            <h1 class="historial-titulo">📊 Mi Historial de Reportes</h1>
+            <p class="historial-subtitulo">Consulta los reportes meteorológicos que has generado</p>
+        </div>
+        
+        <div id="historial-contenido">
+            <div class="cargando-placeholder">Cargando historial...</div>
+        </div>
+    </div>
+
+    <!-- Modal para ver reporte completo -->
+    <div id="modal-reporte" class="modal-reporte-overlay">
+        <div class="modal-reporte-contenedor">
+            <div class="modal-reporte-header">
+                <span class="modal-reporte-titulo" id="modal-reporte-titulo">Reporte</span>
+                <button class="modal-reporte-cerrar" onclick="cerrarModalReporte()">✕</button>
+            </div>
+            <iframe id="modal-reporte-iframe" class="modal-reporte-iframe"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        
+        async function cargarHistorial() {
+            try {
+                const response = await fetch('/api/historial');
+                const data = await response.json();
+                
+                if (!data.exito) {
+                    mostrarError(data.error || 'Error al cargar historial');
+                    return;
+                }
+                
+                if (data.reportes.length === 0) {
+                    mostrarVacio();
+                    return;
+                }
+                
+                mostrarLista(data.reportes);
+            } catch (error) {
+                mostrarError('Error de conexión');
+            }
+        }
+        
+        function mostrarVacio() {
+            document.getElementById('historial-contenido').innerHTML = `
+                <div class="historial-vacio">
+                    <div class="historial-vacio-icono">📭</div>
+                    <h2 class="historial-vacio-titulo">Tu historial está vacío</h2>
+                    <p class="historial-vacio-texto">
+                        Cuando generes reportes meteorológicos, aparecerán aquí.<br>
+                        Ve a la sección "Generar reporte a mi correo" para crear tu primer reporte.
+                    </p>
+                    <a href="/" class="historial-btn historial-btn-primario">Ir al inicio</a>
+                </div>
+            `;
+        }
+        
+        function mostrarLista(reportes) {
+            let html = '<div class="historial-lista">';
+            
+            reportes.forEach((reporte, index) => {
+                const fecha = new Date(reporte.timestamp || reporte.fecha);
+                const dia = fecha.getDate();
+                const mes = MESES[fecha.getMonth()];
+                const datosCortos = reporte.datos_clima 
+                    ? reporte.datos_clima.substring(0, 100) + (reporte.datos_clima.length > 100 ? '...' : '')
+                    : 'Sin datos';
+                
+                html += `
+                    <div class="historial-item">
+                        <div class="historial-item-fecha">
+                            <div class="historial-item-dia">${dia}</div>
+                            <div class="historial-item-mes">${mes}</div>
+                        </div>
+                        <div class="historial-item-info">
+                            <div class="historial-item-comuna">📍 ${reporte.comuna_nombre}</div>
+                            <div class="historial-item-datos">${datosCortos}</div>
+                        </div>
+                        <div class="historial-item-acciones">
+                            <button class="historial-btn" onclick="verReporte(${index})">Ver</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            document.getElementById('historial-contenido').innerHTML = html;
+        }
+        
+        function mostrarError(mensaje) {
+            document.getElementById('historial-contenido').innerHTML = `
+                <div class="historial-vacio">
+                    <div class="historial-vacio-icono">⚠️</div>
+                    <h2 class="historial-vacio-titulo">Error</h2>
+                    <p class="historial-vacio-texto">${mensaje}</p>
+                </div>
+            `;
+        }
+        
+        async function verReporte(index) {
+            try {
+                const response = await fetch(`/api/historial/${index}`);
+                const data = await response.json();
+                
+                if (!data.exito) {
+                    alert('Error al cargar el reporte');
+                    return;
+                }
+                
+                const modal = document.getElementById('modal-reporte');
+                const iframe = document.getElementById('modal-reporte-iframe');
+                const titulo = document.getElementById('modal-reporte-titulo');
+                
+                titulo.textContent = `Reporte - ${data.reporte.comuna_nombre} (${data.reporte.fecha})`;
+                iframe.srcdoc = data.reporte.html_reporte;
+                modal.classList.add('activo');
+            } catch (error) {
+                alert('Error de conexión');
+            }
+        }
+        
+        function cerrarModalReporte() {
+            document.getElementById('modal-reporte').classList.remove('activo');
+        }
+        
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                cerrarModalReporte();
+            }
+        });
+        
+        // Cargar historial al iniciar
+        cargarHistorial();
+    </script>
+</body>
+</html>

@@ -25,7 +25,7 @@ class GuardarReporteTool(BaseTool):
     args_schema: Type[BaseModel] = GuardarReporteInput
     
     # Ruta por defecto alineada a tu estructura de carpetas
-    ruta_historial: str = "memoria/historial_reportes.json"
+    ruta_historial: str = "datos/historial_reportes.json"
 
     def _run(self, fecha: str, ciudad: str, datos: str) -> str:
         try:
@@ -69,7 +69,7 @@ class ConsultarHistorialTool(BaseTool):
     description: str = "Útil para obtener reportes meteorológicos pasados de una ciudad. Úsala para comparar el clima actual con los días anteriores."
     args_schema: Type[BaseModel] = ConsultarHistorialInput
     
-    ruta_historial: str = "memoria/historial_reportes.json"
+    ruta_historial: str = "datos/historial_reportes.json"
 
     def _run(self, ciudad: str, consulta: Optional[str] = None) -> str:
         try:

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiénes Somos - Agente Clima</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .qs-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        .qs-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .qs-logo {
+            width: 100px;
+            height: 100px;
+            animation: bounce 3s infinite ease-in-out;
+            margin-bottom: 20px;
+        }
+        
+        .qs-titulo {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .qs-subtitulo {
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .qs-seccion {
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .qs-seccion-titulo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #E7E3D8;
+        }
+        
+        .qs-seccion-titulo .emoji {
+            font-size: 24px;
+        }
+        
+        .qs-texto {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #333;
+        }
+        
+        .qs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .qs-item {
+            background: #E7E3D8;
+            border: 2px solid #000;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .qs-item-icono {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .qs-item-titulo {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .qs-item-desc {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .qs-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .qs-tag {
+            background: #EBCF7C;
+            border: 2px solid #000;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .qs-comunas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .qs-comuna {
+            background: #B8D6EB;
+            border: 2px solid #000;
+            border-radius: 15px;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .qs-btn-volver {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #000;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: opacity 0.2s;
+        }
+        
+        .qs-btn-volver:hover {
+            opacity: 0.7;
+        }
+        
+        .qs-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #E7E3D8;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="qs-container">
+        <a href="/" class="qs-btn-volver">← Volver al inicio</a>
+        
+        <div class="qs-header">
+            <img src="{{ url_for('static', filename='Logo.png') }}" alt="Agente Clima" class="qs-logo">
+            <h1 class="qs-titulo">AGENTE-CLIMA</h1>
+            <p class="qs-subtitulo">Sistema Agente Inteligente Meteorológico</p>
+        </div>
+        
+        <div class="qs-seccion">
+            <h2 class="qs-seccion-titulo">
+                <span class="emoji">🎯</span>
+                Propósito
+            </h2>
+            <p class="qs-texto">
+                Agente-Clima es un sistema autónomo que genera reportes meteorológicos inteligentes 
+                combinando datos en tiempo real, memoria persistente y análisis con IA generativa. 
+                Diseñado para la Región de Los Lagos, Chile, proporciona información meteorológica 
+                precisa y recomendaciones personalizadas según las condiciones climáticas actuales.
+            </p>
+        </div>
+        
+        <div class="qs-seccion">
+            <h2 class="qs-seccion-titulo">
+                <span class="emoji">🏗️</span>
+                Arquitectura
+            </h2>
+            <div class="qs-grid">
+                <div class="qs-item">
+                    <div class="qs-item-icono">🧠</div>
+                    <div class="qs-item-titulo">Cerebro IA</div>
+                    <div class="qs-item-desc">GPT-4o vía GitHub Models</div>
+                </div>
+                <div class="qs-item">
+                    <div class="qs-item-icono">⚙️</div>
+                    <div class="qs-item-titulo">Framework</div>
+                    <div class="qs-item-desc">LangChain + Flask</div>
+                </div>
+                <div class="qs-item">
+                    <div class="qs-item-icono">🌤️</div>
+                    <div class="qs-item-titulo">API Meteorológica</div>
+                    <div class="qs-item-desc">Open-Meteo (gratuita)</div>
+                </div>
+                <div class="qs-item">
+                    <div class="qs-item-icono">💾</div>
+                    <div class="qs-item-titulo">Memoria</div>
+                    <div class="qs-item-desc">JSON persistente</div>
+                </div>
+                <div class="qs-item">
+                    <div class="qs-item-icono">📧</div>
+                    <div class="qs-item-titulo">Correo</div>
+                    <div class="qs-item-desc">SMTP Gmail</div>
+                </div>
+                <div class="qs-item">
+                    <div class="qs-item-icono">🔊</div>
+                    <div class="qs-item-titulo">Voz</div>
+                    <div class="qs-item-desc">Edge TTS</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="qs-seccion">
+            <h2 class="qs-seccion-titulo">
+                <span class="emoji">🔧</span>
+                Capacidades
+            </h2>
+            <div class="qs-grid">
+                <div class="qs-item">
+                    <div class="qs-item-icono">🌡️</div>
+                    <div class="qs-item-titulo">Clima en Tiempo Real</div>
+                    <div class="qs-item-desc">15 comunas de Los Lagos</div>
+                </div>
+                <div class="qs-item">
+                    <div class="qs-item-icono">💬</div>
+                    <div class="qs-item-titulo">Chat Conversacional</div>
+                    <div class="qs-item-desc">Con contexto climático</div>
+                </div>
+                <div class="qs-item">
+                    <div class="qs-item-icono">📊</div>
+                    <div class="qs-item-titulo">Reportes HTML</div>
+                    <div class="qs-item-desc">Personalizados por correo</div>
+                </div>
+                <div class="qs-item">
+                    <div class="qs-item-icono">📍</div>
+                    <div class="qs-item-titulo">Recomendaciones</div>
+                    <div class="qs-item-desc">Lugares según clima/horario</div>
+                </div>
+                <div class="qs-item">
+                    <div class="qs-item-icono">🎙️</div>
+                    <div class="qs-item-titulo">Síntesis de Voz</div>
+                    <div class="qs-item-desc">TTS con voz humana</div>
+                </div>
+                <div class="qs-item">
+                    <div class="qs-item-icono">📈</div>
+                    <div class="qs-item-titulo">Métricas</div>
+                    <div class="qs-item-desc">Dashboard de trazabilidad</div>
+                </div>
+                <div class="qs-item">
+                    <div class="qs-item-icono">🔒</div>
+                    <div class="qs-item-titulo">Seguridad</div>
+                    <div class="qs-item-desc">Multilenguaje (8 idiomas)</div>
+                </div>
+                <div class="qs-item">
+                    <div class="qs-item-icono">👤</div>
+                    <div class="qs-item-titulo">Autenticación</div>
+                    <div class="qs-item-desc">Sistema de usuarios</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="qs-seccion">
+            <h2 class="qs-seccion-titulo">
+                <span class="emoji">🌍</span>
+                Cobertura
+            </h2>
+            <p class="qs-texto">Región de Los Lagos, Chile:</p>
+            <div class="qs-comunas">
+                <span class="qs-comuna">Puerto Montt</span>
+                <span class="qs-comuna">Puerto Varas</span>
+                <span class="qs-comuna">Frutillar</span>
+                <span class="qs-comuna">Osorno</span>
+                <span class="qs-comuna">Castro</span>
+                <span class="qs-comuna">Ancud</span>
+                <span class="qs-comuna">Calbuco</span>
+                <span class="qs-comuna">Llanquihue</span>
+                <span class="qs-comuna">Purranque</span>
+                <span class="qs-comuna">Dalcahue</span>
+                <span class="qs-comuna">Chonchi</span>
+                <span class="qs-comuna">Quellón</span>
+                <span class="qs-comuna">Puerto Octay</span>
+                <span class="qs-comuna">Fresia</span>
+                <span class="qs-comuna">Los Muermos</span>
+            </div>
+        </div>
+        
+        <div class="qs-seccion">
+            <h2 class="qs-seccion-titulo">
+                <span class="emoji">👥</span>
+                Equipo
+            </h2>
+            <p class="qs-texto">
+                <strong>Ingeniería Informática 2026</strong><br>
+                DuocUC - Sede Puerto Montt<br><br>
+                Proyecto desarrollado como parte de la asignatura 
+                <em>Ingeniería de Soluciones de IA</em>.
+            </p>
+        </div>
+        
+        <div class="qs-seccion">
+            <h2 class="qs-seccion-titulo">
+                <span class="emoji">📦</span>
+                Tecnologías
+            </h2>
+            <div class="qs-tags">
+                <span class="qs-tag">Python</span>
+                <span class="qs-tag">LangChain</span>
+                <span class="qs-tag">Flask</span>
+                <span class="qs-tag">OpenAI GPT-4o</span>
+                <span class="qs-tag">Open-Meteo</span>
+                <span class="qs-tag">Edge TTS</span>
+                <span class="qs-tag">Sentence Transformers</span>
+                <span class="qs-tag">Pydantic</span>
+                <span class="qs-tag">bcrypt</span>
+            </div>
+        </div>
+        
+        <div class="qs-footer">
+            <p>© Ingeniería Informática 2026</p>
+            <p>Operado por Arquitectura LangChain + OpenAI</p>
+        </div>
+    </div>
+</body>
+</html>

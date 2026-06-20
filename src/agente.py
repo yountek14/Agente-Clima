@@ -2,13 +2,14 @@ import os
 import re
 import time
 from datetime import datetime
+from typing import Optional
 from dotenv import load_dotenv
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
 from herramientas.clima import ConsultarClimaTool
-from herramientas.historial import GuardarReporteTool, ConsultarHistorialTool
+from herramientas.historial_usuario import consultar_historial_usuario, guardar_reporte_usuario
 from herramientas.email_sender import EnviarEmailTool
 from herramientas.planificador import Planificador
 from herramientas.recomendaciones import ConsultarRecomendacionesTool, obtener_horario, obtener_mes_actual
@@ -34,15 +35,20 @@ class AgenteMeteorologicoSimple:
             max_tokens=1024
         ).bind_tools([
             ConsultarClimaTool(),
-            GuardarReporteTool(),
-            ConsultarHistorialTool(),
             EnviarEmailTool()
         ])
 
+        # LLM sin herramientas para generación de texto (análisis IA)
+        self.llm_texto = ChatOpenAI(
+            model="gpt-4o",
+            openai_api_base=os.getenv("OPENAI_BASE_URL", "https://models.inference.ai.azure.com"),
+            openai_api_key=os.getenv("GITHUB_TOKEN"),
+            temperature=0.2,
+            max_tokens=1024
+        )
+
         self.tools_map = {
             "consultar_clima": ConsultarClimaTool(),
-            "guardar_reporte": GuardarReporteTool(),
-            "consultar_historial": ConsultarHistorialTool(),
             "consultar_recomendaciones": ConsultarRecomendacionesTool(),
             "enviar_reporte_email": EnviarEmailTool()
         }
@@ -51,10 +57,8 @@ class AgenteMeteorologicoSimple:
             "Eres un asistente meteorológico profesional y automatizado. Tu tarea es recopilar datos del clima y enviar un reporte detallado por correo.\n\n"
             "Flujo de trabajo sugerido:\n"
             "1. Utiliza la herramienta 'consultar_clima' para obtener las condiciones de la ciudad solicitada.\n"
-            "2. Utiliza la herramienta 'consultar_historial' para revisar reportes anteriores.\n"
-            "3. Redacta una conclusión útil para el usuario basada en los datos obtenidos.\n"
-            "4. Guarda los datos usando la herramienta 'guardar_reporte' con la fecha actual.\n"
-            "5. Envía el mensaje final usando la herramienta 'enviar_reporte_email'.\n\n"
+            "2. Redacta una conclusión útil para el usuario basada en los datos obtenidos.\n"
+            "3. Envía el mensaje final usando la herramienta 'enviar_reporte_email'.\n\n"
             "Por favor, procede con la ejecución de las herramientas correspondientes de forma ordenada."
         )
 
@@ -104,16 +108,25 @@ class AgenteMeteorologicoSimple:
             return self.assets_clima["nublado"]
         return self.assets_clima["despejado"]
 
-    def generar_reporte(self, email: str, comuna_id: str, nombre_comuna: str, latitud: float, longitud: float) -> dict:
+    def generar_reporte(
+        self, 
+        email: str, 
+        comuna_id: str, 
+        nombre_comuna: str, 
+        latitud: float, 
+        longitud: float,
+        user_id: Optional[str] = None
+    ) -> dict:
         traza = sistema_trazas.iniciar_traza(
             "generar_reporte",
             comuna=nombre_comuna,
             email=email,
+            user_id=user_id or "visitante"
         )
         trace_id = traza.trace_id
         span_raiz = sistema_trazas.iniciar_span("reporte_completo")
 
-        logger.info("reporte_iniciado", trace_id=trace_id, comuna=nombre_comuna, email=email)
+        logger.info("reporte_iniciado", trace_id=trace_id, comuna=nombre_comuna, email=email, user_id=user_id)
 
         planificador = Planificador()
         plan = planificador.crear_plan(f"Reporte meteorológico para {nombre_comuna}")
@@ -141,33 +154,40 @@ class AgenteMeteorologicoSimple:
             logger.error("paso1_clima_error", trace_id=trace_id, error=str(e))
             raise
 
-        # Paso 2: Historial
-        span_historial = sistema_trazas.iniciar_span("consultar_historial", parent_span_id=span_raiz.span_id)
-        logger.info("paso2_historial_iniciado", trace_id=trace_id)
-        inicio = time.perf_counter()
-        try:
-            historial_res = self.tools_map["consultar_historial"].invoke({"ciudad": nombre_comuna})
-            duracion = (time.perf_counter() - inicio) * 1000
-            sistema_trazas.finalizar_span(span_historial, duracion_ms=round(duracion, 2))
-            recolector.registrar("consultar_historial", duracion, trace_id=trace_id)
-            logger.info("paso2_historial_ok", trace_id=trace_id, duracion_ms=round(duracion, 2))
-            plan.marcar_completado("Recuperar reportes previos desde memoria persistente")
-        except Exception as e:
-            duracion = (time.perf_counter() - inicio) * 1000
-            sistema_trazas.finalizar_span(span_historial, estado="ERROR", error=str(e))
-            recolector.registrar("consultar_historial", duracion, exitoso=False, tipo_error=type(e).__name__, trace_id=trace_id)
-            logger.error("paso2_historial_error", trace_id=trace_id, error=str(e))
-            raise
+        # Paso 2: Historial (solo si es usuario registrado)
+        historial_res = ""
+        tiene_historial = False
+        if user_id:
+            span_historial = sistema_trazas.iniciar_span("consultar_historial_usuario", parent_span_id=span_raiz.span_id)
+            logger.info("paso2_historial_usuario_iniciado", trace_id=trace_id, user_id=user_id)
+            inicio = time.perf_counter()
+            try:
+                historial_res = consultar_historial_usuario(user_id)
+                tiene_historial = "No hay historial" not in historial_res
+                duracion = (time.perf_counter() - inicio) * 1000
+                sistema_trazas.finalizar_span(span_historial, duracion_ms=round(duracion, 2))
+                recolector.registrar("consultar_historial_usuario", duracion, trace_id=trace_id)
+                logger.info("paso2_historial_usuario_ok", trace_id=trace_id, duracion_ms=round(duracion, 2), tiene_historial=tiene_historial)
+                plan.marcar_completado("Recuperar reportes previos del usuario")
+            except Exception as e:
+                duracion = (time.perf_counter() - inicio) * 1000
+                sistema_trazas.finalizar_span(span_historial, estado="ERROR", error=str(e))
+                recolector.registrar("consultar_historial_usuario", duracion, exitoso=False, tipo_error=type(e).__name__, trace_id=trace_id)
+                logger.error("paso2_historial_usuario_error", trace_id=trace_id, error=str(e))
 
         horario = obtener_horario()
         mes = obtener_mes_actual()
 
         match_temp = re.search(r"Temperatura:\s*([\d.]+)", clima_res)
         match_wmo = re.search(r"Código del Clima \(WMO\):\s*(\d+)", clima_res)
-        match_lluvia = re.search(r"Lluvia:\s*([\d.]+)", clima_res)
+        match_lluvia = re.search(r"Precipitación total:\s*([\d.]+)", clima_res) or re.search(r"Lluvia:\s*([\d.]+)", clima_res)
         temp_val = float(match_temp.group(1)) if match_temp else 10.0
         wmo_val = int(match_wmo.group(1)) if match_wmo else 0
         lluvia_val = float(match_lluvia.group(1)) if match_lluvia else 0.0
+
+        logger.info("paso3_valores_extraidos", trace_id=trace_id,
+                   temp_val=temp_val, wmo_val=wmo_val, lluvia_val=lluvia_val,
+                   horario=horario, mes=mes)
 
         # Paso 3: Recomendaciones
         span_rec = sistema_trazas.iniciar_span("consultar_recomendaciones", parent_span_id=span_raiz.span_id)
@@ -185,7 +205,8 @@ class AgenteMeteorologicoSimple:
             duracion = (time.perf_counter() - inicio) * 1000
             sistema_trazas.finalizar_span(span_rec, duracion_ms=round(duracion, 2))
             recolector.registrar("consultar_recomendaciones", duracion, trace_id=trace_id)
-            logger.info("paso3_recomendaciones_ok", trace_id=trace_id, duracion_ms=round(duracion, 2))
+            logger.info("paso3_recomendaciones_ok", trace_id=trace_id, duracion_ms=round(duracion, 2),
+                       recomendaciones_preview=recomendaciones_res[:200] if recomendaciones_res else "VACÍO")
             plan.marcar_completado("Obtener lugares recomendados según clima, temporada y horario")
         except Exception as e:
             duracion = (time.perf_counter() - inicio) * 1000
@@ -206,25 +227,53 @@ class AgenteMeteorologicoSimple:
             9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre"
         }.get(mes, "")
 
-        prompt_formatos = (
-            f"Tienes dos tareas independientes y debes devolverlas separadas estrictamente por el marcador '[SEPARADOR]'.\n\n"
-            f"Tarea 1:\n"
-            f"Toma este registro histórico en crudo: {historial_res}.\n"
-            f"Transfórmalo en un texto limpio, formal e ideal para leer en un correo. Muestra las fechas y desglosa sus métricas correspondientes de forma clara (usa saltos de línea con <br> y puntos con • si corresponde). No dejes rastro de formato JSON, llaves ni contraslas residuales.\n\n"
-            f"[SEPARADOR]\n\n"
-            f"Tarea 2:\n"
-            f"Analiza las condiciones actuales de {nombre_comuna} ({nombre_mes}, {horario}): {clima_res} junto al historial.\n"
-            f"Redacta un párrafo analítico y cercano con:\n"
-            f"- Consejos prácticos de vestimenta para el clima actual ({temp_val}°C, horario {horario}).\n"
-            f"- Recomendaciones de actividades y lugares para disfrutar {nombre_comuna}, elige entre estas opciones según el clima:\n"
-            f"{recomendaciones_res}\n"
-            f"- Contexto del horario ({horario}) para ajustar las sugerencias.\n"
-            f"REGLA CRÍTICA: Si la velocidad del viento supera los 40 km/h, incluye una alerta de seguridad explícita. No uses formato Markdown."
-        )
+        # Fecha y hora actual para contexto temporal (zona horaria de Chile)
+        from zoneinfo import ZoneInfo
+        ahora_fecha = datetime.now(ZoneInfo("America/Santiago"))
+        fecha_actual = ahora_fecha.strftime("%A %d de %B de %Y")
+        hora_actual = ahora_fecha.strftime("%H:%M")
+        contexto_temporal = f"Hoy es {fecha_actual}, son las {hora_actual} (hora de Chile)."
+
+        # Prompt adaptativo según si hay historial o no
+        if tiene_historial:
+            prompt_formatos = (
+                f"{contexto_temporal}\n\n"
+                f"Tienes dos tareas independientes y debes devolverlas separadas estrictamente por el marcador '[SEPARADOR]'.\n\n"
+                f"Tarea 1:\n"
+                f"Sé breve y directo (máximo 3-4 líneas). Para {nombre_comuna} con {temp_val}°C en {horario}:\n"
+                f"- 1 consejo rápido de vestimenta\n"
+                f"- 1-2 lugares recomendados de esta lista según el clima: {recomendaciones_res}\n"
+                f"Si el viento supera 40 km/h, agrega: ⚠️ Alerta: viento fuerte.\n\n"
+                f"[SEPARADOR]\n\n"
+                f"Tarea 2:\n"
+                f"Toma este registro histórico del usuario en crudo: {historial_res}.\n"
+                f"Transfórmalo en un texto limpio, formal e ideal para leer en un correo. Muestra las fechas y desglosa sus métricas correspondientes de forma clara (usa saltos de línea con <br> y puntos con • si corresponde). No dejes rastro de formato JSON, llaves ni contraslas residuales.\n"
+            )
+        else:
+            prompt_formatos = (
+                f"{contexto_temporal}\n\n"
+                f"Sé breve y directo (máximo 3-4 líneas). Para {nombre_comuna} con {temp_val}°C en {horario}:\n"
+                f"- 1 consejo rápido de vestimenta\n"
+                f"- 1-2 lugares recomendados de esta lista según el clima: {recomendaciones_res}\n"
+                f"Si el viento supera 40 km/h, agrega: ⚠️ Alerta: viento fuerte."
+            )
+
+        # Log del prompt enviado
+        logger.info("paso4_prompt_enviado", trace_id=trace_id, 
+                   prompt_length=len(prompt_formatos),
+                   tiene_historial=tiene_historial,
+                   recomendaciones_length=len(recomendaciones_res))
 
         inicio_ia = time.perf_counter()
         try:
-            response_ia = self.chain.invoke({"input": prompt_formatos})
+            # Usar LLM sin herramientas para generación de texto
+            from langchain_core.prompts import ChatPromptTemplate
+            prompt_texto = ChatPromptTemplate.from_messages([
+                ("system", "Eres un asistente meteorológico profesional. Genera recomendaciones útiles y concisas basadas en los datos proporcionados."),
+                ("human", "{input}")
+            ])
+            chain_texto = prompt_texto | self.llm_texto
+            response_ia = chain_texto.invoke({"input": prompt_formatos})
             contenido_completo = response_ia.content if hasattr(response_ia, 'content') else str(response_ia)
             duracion_ia = (time.perf_counter() - inicio_ia) * 1000
 
@@ -233,18 +282,29 @@ class AgenteMeteorologicoSimple:
                                  tokens_prompt=response_ia.usage.prompt_tokens if hasattr(response_ia, 'usage') and response_ia.usage else 0,
                                  tokens_completion=response_ia.usage.completion_tokens if hasattr(response_ia, 'usage') and response_ia.usage else 0,
                                  trace_id=trace_id, modelo="gpt-4o")
-            logger.info("paso4_analisis_ia_ok", trace_id=trace_id, duracion_ms=round(duracion_ia, 2))
+            logger.info("paso4_analisis_ia_ok", trace_id=trace_id, duracion_ms=round(duracion_ia, 2),
+                       contenido_completo_preview=contenido_completo[:300] if contenido_completo else "VACÍO")
 
-            try:
-                historial_formateado, conclusion_ia = contenido_completo.split("[SEPARADOR]")
-                historial_formateado = historial_formateado.strip()
-                conclusion_ia = conclusion_ia.strip()
-            except Exception:
-                historial_formateado = "Historial climático procesado correctamente."
+            if tiene_historial:
+                try:
+                    conclusion_ia, historial_formateado = contenido_completo.split("[SEPARADOR]")
+                    conclusion_ia = conclusion_ia.strip()
+                    historial_formateado = historial_formateado.strip()
+                except Exception:
+                    conclusion_ia = contenido_completo
+                    historial_formateado = ""
+            else:
                 conclusion_ia = contenido_completo
+                historial_formateado = ""
 
-            historial_formateado = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', historial_formateado)
+            # Log para debugging
+            logger.info("paso4_conclusion_ia_generada", trace_id=trace_id, 
+                       conclusion_length=len(conclusion_ia), 
+                       conclusion_preview=conclusion_ia[:200] if conclusion_ia else "VACÍO")
+
             conclusion_ia = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', conclusion_ia)
+            if historial_formateado:
+                historial_formateado = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', historial_formateado)
 
             plan.marcar_completado("Sintetizar datos actuales e históricos con IA generativa")
         except Exception as e:
@@ -253,6 +313,24 @@ class AgenteMeteorologicoSimple:
             recolector.registrar("analisis_ia", duracion_ia, exitoso=False, tipo_error=type(e).__name__, trace_id=trace_id)
             logger.error("paso4_analisis_ia_error", trace_id=trace_id, error=str(e))
             raise
+
+        # Construir HTML del reporte con estructura reorganizada
+        # Orden: Condiciones -> Recomendaciones -> Historial (si existe) -> Footer
+        seccion_recomendaciones = f"""
+                    <h3 style="margin: 0 0 12px 0; color: #2b6cb0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">🧠 Recomendaciones del Agente Inteligente</h3>
+                    <div style="background-color: #ebf8ff; border: 1px solid #bee3f8; padding: 18px; border-radius: 8px; margin-bottom: 25px;">
+                        <p style="margin: 0; line-height: 1.6; font-size: 14px; color: #2b6cb0; font-weight: 500;">{conclusion_ia}</p>
+                    </div>
+        """
+
+        seccion_historial = ""
+        if tiene_historial and historial_formateado:
+            seccion_historial = f"""
+                    <h3 style="margin: 0 0 12px 0; color: #4a5568; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">📊 Tu Historial Comparativo</h3>
+                    <div style="background-color: #fafbfc; border-left: 4px solid #718096; padding: 15px; margin-bottom: 15px; border-radius: 0 8px 8px 0;">
+                        <p style="margin: 0; line-height: 1.6; font-size: 14px; color: #4a5568;">{historial_formateado}</p>
+                    </div>
+            """
 
         html_template = f"""
         <!DOCTYPE html>
@@ -265,7 +343,7 @@ class AgenteMeteorologicoSimple:
 
                 <div style="background-color: {diseno['bg_header']}; padding: 25px; text-align: center; border-bottom: 1px solid #e1e8ed;">
                     <img src="{diseno['url_img']}" width="70" height="70" alt="Icono Clima" style="display: block; margin: 0 auto 10px auto;">
-                    <h2 style="margin: 0; color: #1a202c; font-size: 22px; font-weight: 700;">Reporte Meteorológico Adaptativo</h2>
+                    <h2 style="margin: 0; color: #1a202c; font-size: 22px; font-weight: 700;">Reporte Meteorológico</h2>
                     <p style="margin: 5px 0 0 0; color: #4a5568; font-size: 14px;">📍 {nombre_comuna}, Región de Los Lagos</p>
                 </div>
 
@@ -275,15 +353,9 @@ class AgenteMeteorologicoSimple:
                         <p style="margin: 0; line-height: 1.6; font-size: 15px;">{clima_res.replace('- ', '• ').replace('\n', '<br>')}</p>
                     </div>
 
-                    <h3 style="margin: 0 0 12px 0; color: #4a5568; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">📊 Tendencias y Comparativa Histórica</h3>
-                    <div style="background-color: #fafbfc; border-left: 4px solid #718096; padding: 15px; margin-bottom: 25px; border-radius: 0 8px 8px 0;">
-                        <p style="margin: 0; line-height: 1.6; font-size: 14px; color: #4a5568;">{historial_formateado}</p>
-                    </div>
+                    {seccion_recomendaciones}
 
-                    <h3 style="margin: 0 0 12px 0; color: #2b6cb0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">🧠 Recomendaciones del Agente Inteligente</h3>
-                    <div style="background-color: #ebf8ff; border: 1px solid #bee3f8; padding: 18px; border-radius: 8px; margin-bottom: 15px;">
-                        <p style="margin: 0; line-height: 1.6; font-size: 14px; color: #2b6cb0; font-weight: 500;">{conclusion_ia}</p>
-                    </div>
+                    {seccion_historial}
                 </div>
 
                 <div style="background-color: #f7fafc; padding: 15px; text-align: center; border-top: 1px solid #e1e8ed;">
@@ -295,18 +367,25 @@ class AgenteMeteorologicoSimple:
         </html>
         """
 
-        # Paso 5: Guardar y enviar
+        # Paso 5: Guardar (si es usuario) y enviar
         span_final = sistema_trazas.iniciar_span("guardar_enviar_email", parent_span_id=span_raiz.span_id)
         logger.info("paso5_guardar_enviar_iniciado", trace_id=trace_id)
         inicio = time.perf_counter()
         try:
             fecha_hoy = datetime.now().strftime("%Y-%m-%d")
-            self.tools_map["guardar_reporte"].invoke({
-                "ciudad": nombre_comuna,
-                "fecha": fecha_hoy,
-                "datos": clima_res
-            })
-            plan.marcar_completado("Persistir el reporte en el sistema de memoria JSON")
+            
+            # Guardar en historial del usuario si está registrado
+            if user_id:
+                guardar_reporte_usuario(
+                    user_id=user_id,
+                    fecha=fecha_hoy,
+                    comuna_id=comuna_id,
+                    comuna_nombre=nombre_comuna,
+                    datos_clima=clima_res,
+                    html_reporte=html_template,
+                    correo_destino=email
+                )
+                plan.marcar_completado("Persistir el reporte en el historial del usuario")
 
             self.tools_map["enviar_reporte_email"].invoke({
                 "destinatario": email,

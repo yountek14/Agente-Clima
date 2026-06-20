@@ -24,7 +24,7 @@ graph TB
 
     subgraph Capa_Herramientas
         E --> J[API Open-Meteo]
-        F --> K[memoria/historial_reportes.json]
+        F --> K[datos/historial_reportes.json]
         H --> K
         I --> L[SMTP Gmail]
     end
@@ -104,23 +104,35 @@ EMAIL_REMITENTE="tu_correo@gmail.com"
 EMAIL_PASSWORD="tu_password_app"
 ```
 3. Instalar dependencias: `pip install -r requirements.txt`
-4. Ejecutar: `python agente.py`
+4. Ejecutar: `.\.venv\Scripts\python.exe src\app.py` o `.\scripts\iniciar.ps1`
+5. Abrir: `http://localhost:5000`
 
 ## Estructura del Proyecto
 
 ```
-AgenteClima/
-  agente.py                          # Orquestación principal del agente
-  herramientas/
-    clima.py                         # Tool: consulta Open-Meteo API
-    historial.py                     # Tools: guardar/consultar historial JSON
-    email_sender.py                  # Tool: envío SMTP
-    planificador.py                  # Planificación y descomposición de tareas
-  memoria/
-    historial_reportes.json          # Memoria persistente (largo plazo)
-  RA2-Extraccion/                    # Material de referencia del examen EP2
-  .env                               # Variables de entorno (no versionado)
-  requirements.txt                   # Dependencias Python
+Agente-Clima/
+├── src/
+│   ├── app.py                      # Servidor Flask (API + frontend)
+│   ├── agente.py                   # Orquestación principal del agente
+│   └── comunas.py                  # Catálogo de comunas (Los Lagos)
+├── herramientas/
+│   ├── clima.py                    # Tool: consulta Open-Meteo API
+│   ├── detector_embedding.py       # Detector semántico de contenido malicioso
+│   ├── email_sender.py             # Tool: envío SMTP
+│   ├── historial.py                # Tools: guardar/consultar historial JSON
+│   ├── monitoreo.py                # Logging, métricas y trazas
+│   ├── planificador.py             # Planificación y descomposición de tareas
+│   ├── recomendaciones.py          # Tool: recomendaciones según clima
+│   └── seguridad.py                # Validación, filtro ético, rate limiting
+├── static/                         # CSS, JS, imágenes del frontend
+├── templates/                      # Plantillas HTML (Jinja2)
+├── datos/                          # Datos JSON persistentes
+├── logs/                           # Logs de ejecución
+├── scripts/                        # Scripts de utilidad
+├── docs/                           # Documentación y recursos
+├── .env                            # Variables de entorno (no versionado)
+├── requirements.txt                # Dependencias Python
+└── BITACORA.md                     # Historial completo del proyecto
 ```
 
 ## Referencias
