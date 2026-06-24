@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgenteClima - IA Meteorologica</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #E7E3D8;
+            color: #000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 16px;
+        }
+        .container {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .card {
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 24px;
+            padding: 20px;
+        }
+        .hero {
+            background: #000;
+            color: #EBCF7C;
+            text-align: center;
+            padding: 28px 20px;
+        }
+        .hero h1 { font-size: 28px; font-weight: 800; }
+        .hero p { font-size: 14px; color: #E7E3D8; margin-top: 6px; line-height: 1.4; }
+        .hero .emoji { font-size: 48px; margin-bottom: 8px; }
+
+        h2 {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .feature-list { display: flex; flex-direction: column; gap: 6px; }
+        .feature {
+            background: #E7E3D8;
+            border: 2px solid #000;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+        .tech-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag {
+            background: #000;
+            color: #EBCF7C;
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .comuna-list { display: flex; flex-wrap: wrap; gap: 4px; }
+        .comuna {
+            background: #B8D6EB;
+            border: 1.5px solid #000;
+            border-radius: 8px;
+            padding: 3px 10px;
+            font-size: 12px;
+        }
+        .team p { font-size: 15px; margin: 2px 0; }
+        .team .school { font-size: 12px; color: #666; margin-top: 6px; }
+        .links { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn {
+            display: inline-block;
+            background: #000;
+            color: #EBCF7C;
+            padding: 10px 20px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            border: 2px solid #000;
+        }
+        .btn-outline {
+            background: transparent;
+            color: #000;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="card hero">
+        <div class="emoji">&#x2600;&#xFE0F;</div>
+        <h1>AgenteClima</h1>
+        <p>Sistema de IA aut&oacute;nomo para reportes meteorol&oacute;gicos de la Regi&oacute;n de Los Lagos</p>
+    </div>
+
+    <div class="card">
+        <h2>Que hace</h2>
+        <p style="font-size:14px; line-height:1.6;">
+            Un <strong>agente de IA</strong> que consulta el clima en vivo desde m&uacute;ltiples fuentes,
+            lo analiza con GPT-4o y env&iacute;a reportes personalizados por email. Solo tienes que decirle
+            <em>&quot;Quiero el clima de Puerto Montt&quot;</em> y el agente hace todo por ti.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Funcionalidades</h2>
+        <div class="feature-list">
+            <div class="feature">&#x1F4AC; Chatbot conversacional con IA</div>
+            <div class="feature">&#x1F4E7; Reportes autom&aacute;ticos por email</div>
+            <div class="feature">&#x1F4C5; Pron&oacute;stico de 7 d&iacute;as + fusi&oacute;n de fuentes</div>
+            <div class="feature">&#x1F3D4; Recomendaciones de lugares seg&uacute;n clima y temporada</div>
+            <div class="feature">&#x1F50A; Texto a voz para leer respuestas</div>
+            <div class="feature">&#x1F6E1; Seguridad multicapa (8 idiomas)</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Tecnologias</h2>
+        <div class="tech-tags">
+            <span class="tag">Python 3.14</span>
+            <span class="tag">Flask</span>
+            <span class="tag">LangChain</span>
+            <span class="tag">GPT-4o</span>
+            <span class="tag">Open-Meteo</span>
+            <span class="tag">WeatherAPI</span>
+            <span class="tag">Edge TTS</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Cobertura: 15 comunas</h2>
+        <div class="comuna-list">
+            <span class="comuna">Puerto Montt</span>
+            <span class="comuna">Puerto Varas</span>
+            <span class="comuna">Frutillar</span>
+            <span class="comuna">Osorno</span>
+            <span class="comuna">Castro</span>
+            <span class="comuna">Ancud</span>
+            <span class="comuna">Calbuco</span>
+            <span class="comuna">Llanquihue</span>
+            <span class="comuna">Purranque</span>
+            <span class="comuna">Dalcahue</span>
+            <span class="comuna">Chonchi</span>
+            <span class="comuna">Quell&oacute;n</span>
+            <span class="comuna">Puerto Octay</span>
+            <span class="comuna">Fresia</span>
+            <span class="comuna">Los Muermos</span>
+        </div>
+    </div>
+
+    <div class="card team">
+        <h2>Equipo</h2>
+        <p><strong>Benjam&iacute;n Ag&uuml;ero</strong></p>
+        <p><strong>Ignacio Salazar</strong></p>
+        <div class="school">
+            DuocUC Puerto Montt &mdash; Ingenier&iacute;a de Soluciones de IA<br>
+            Summit IA Puerto Montt 2026
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="links">
+            <a href="https://github.com/yountek14/Agente-Clima" class="btn" target="_blank">GitHub</a>
+            <span class="btn btn-outline">Summit IA 2026</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        Proyecto acad&eacute;mico &mdash; DuocUC Sede Puerto Montt
+    </div>
+
+</div>
+</body>
+</html>
