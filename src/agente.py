@@ -71,41 +71,127 @@ class AgenteMeteorologicoSimple:
 
         self.assets_clima = {
             "despejado": {
-                "url_img": "https://cdn-icons-png.flaticon.com/512/869/869869.png",
+                "emoji": "☀️",
                 "color_borde": "#ffb300",
-                "bg_header": "#fff8e1"
+                "bg_header": "#fff8e1",
+                "label": "Despejado"
+            },
+            "parcialmente_nublado": {
+                "emoji": "⛅",
+                "color_borde": "#90a4ae",
+                "bg_header": "#eceff1",
+                "label": "Parcialmente nublado"
             },
             "nublado": {
-                "url_img": "https://cdn-icons-png.flaticon.com/512/1163/1163624.png",
+                "emoji": "☁️",
                 "color_borde": "#78909c",
-                "bg_header": "#f0f4f8"
+                "bg_header": "#f0f4f8",
+                "label": "Nublado"
+            },
+            "niebla": {
+                "emoji": "🌫️",
+                "color_borde": "#9e9e9e",
+                "bg_header": "#f5f5f5",
+                "label": "Niebla"
+            },
+            "llovizna": {
+                "emoji": "🌦️",
+                "color_borde": "#64b5f6",
+                "bg_header": "#e3f2fd",
+                "label": "Llovizna"
             },
             "lluvia": {
-                "url_img": "https://cdn-icons-png.flaticon.com/512/1163/1163657.png",
+                "emoji": "🌧️",
                 "color_borde": "#1e88e5",
-                "bg_header": "#e3f2fd"
+                "bg_header": "#e3f2fd",
+                "label": "Lluvia"
+            },
+            "nieve": {
+                "emoji": "🌨️",
+                "color_borde": "#b0bec5",
+                "bg_header": "#eceff1",
+                "label": "Nieve"
+            },
+            "tormenta": {
+                "emoji": "⛈️",
+                "color_borde": "#5c6bc0",
+                "bg_header": "#e8eaf6",
+                "label": "Tormenta"
+            },
+            "viento": {
+                "emoji": "💨",
+                "color_borde": "#78909c",
+                "bg_header": "#eceff1",
+                "label": "Ventoso"
             }
         }
 
     def obtener_configuracion_visual(self, clima_texto):
+        """
+        Determina configuracion visual del reporte segun el codigo WMO.
+        Prioriza condiciones severas sobre las leves.
+        """
         try:
             match = re.search(r"Código del Clima \(WMO\):\s*(\d+)", clima_texto)
             if match:
                 wmo_code = int(match.group(1))
-                if wmo_code in [0, 1]:
-                    return self.assets_clima["despejado"]
-                elif wmo_code in [2, 3]:
-                    return self.assets_clima["nublado"]
-                elif wmo_code >= 51:
+                
+                # Tormenta (95-99)
+                if wmo_code >= 95:
+                    return self.assets_clima["tormenta"]
+                # Nieve intensa (75, 86)
+                if wmo_code == 75 or wmo_code == 86:
+                    return self.assets_clima["nieve"]
+                # Nieve (71-77, 85-86)
+                if 71 <= wmo_code <= 77 or wmo_code in [85, 86]:
+                    return self.assets_clima["nieve"]
+                # Lluvia intensa (65, 67, 82)
+                if wmo_code in [65, 67, 82]:
                     return self.assets_clima["lluvia"]
+                # Lluvia moderada (63, 66, 81)
+                if wmo_code in [63, 66, 81]:
+                    return self.assets_clima["lluvia"]
+                # Lluvia debil / chubascos (61, 80)
+                if wmo_code in [61, 80]:
+                    return self.assets_clima["lluvia"]
+                # Llovizna (51-57)
+                if 51 <= wmo_code <= 57:
+                    return self.assets_clima["llovizna"]
+                # Niebla (45-48)
+                if 45 <= wmo_code <= 48:
+                    return self.assets_clima["niebla"]
+                # Nublado (3)
+                if wmo_code == 3:
+                    return self.assets_clima["nublado"]
+                # Parcialmente nublado (2)
+                if wmo_code == 2:
+                    return self.assets_clima["parcialmente_nublado"]
+                # Principalmente despejado (1)
+                if wmo_code == 1:
+                    return self.assets_clima["parcialmente_nublado"]
+                # Despejado (0)
+                return self.assets_clima["despejado"]
         except Exception:
             pass
 
+        # Fallback: analisis de texto si no se encontro WMO
         texto_min = clima_texto.lower()
-        if "lluvia" in texto_min or "llovizna" in texto_min:
+        if "tormenta" in texto_min or "trueno" in texto_min:
+            return self.assets_clima["tormenta"]
+        if "nieve" in texto_min or "nevando" in texto_min or "granizo" in texto_min:
+            return self.assets_clima["nieve"]
+        if "lluvia" in texto_min or "llovizna" in texto_min or "chubasco" in texto_min:
             return self.assets_clima["lluvia"]
-        elif "nublado" in texto_min or "nubes" in texto_min:
+        if "niebla" in texto_min or "neblina" in texto_min:
+            return self.assets_clima["niebla"]
+        if "nublado" in texto_min or "nubes" in texto_min or "cubierto" in texto_min:
             return self.assets_clima["nublado"]
+        
+        # Verificar viento fuerte
+        match_viento = re.search(r"Viento:\s*([\d.]+)\s*km/h", clima_texto)
+        if match_viento and float(match_viento.group(1)) > 40:
+            return self.assets_clima["viento"]
+        
         return self.assets_clima["despejado"]
 
     def generar_reporte(
@@ -342,9 +428,9 @@ class AgenteMeteorologicoSimple:
             <div style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border: 1px solid #e1e8ed; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 6px solid {diseno['color_borde']};">
 
                 <div style="background-color: {diseno['bg_header']}; padding: 25px; text-align: center; border-bottom: 1px solid #e1e8ed;">
-                    <img src="{diseno['url_img']}" width="70" height="70" alt="Icono Clima" style="display: block; margin: 0 auto 10px auto;">
-                    <h2 style="margin: 0; color: #1a202c; font-size: 22px; font-weight: 700;">Reporte Meteorológico</h2>
-                    <p style="margin: 5px 0 0 0; color: #4a5568; font-size: 14px;">📍 {nombre_comuna}, Región de Los Lagos</p>
+                    <div style="font-size: 52px; line-height: 1; margin-bottom: 6px;">{diseno['emoji']}</div>
+                    <h2 style="margin: 0; color: #1a202c; font-size: 22px; font-weight: 700;">Reporte Meteorol&oacute;gico</h2>
+                    <p style="margin: 5px 0 0 0; color: #4a5568; font-size: 14px;">📍 {nombre_comuna}, Regi&oacute;n de Los Lagos &mdash; {diseno['label']}</p>
                 </div>
 
                 <div style="padding: 25px;">
@@ -389,7 +475,7 @@ class AgenteMeteorologicoSimple:
 
             self.tools_map["enviar_reporte_email"].invoke({
                 "destinatario": email,
-                "asunto": f"☁️ Reporte Meteorológico - {nombre_comuna}",
+                "asunto": f"{diseno['emoji']} Reporte Meteorol\u00f3gico - {nombre_comuna}",
                 "cuerpo": html_template
             })
             plan.marcar_completado("Enviar reporte formateado al destinatario vía SMTP")
