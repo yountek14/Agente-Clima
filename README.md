@@ -232,7 +232,6 @@ Agente-Clima/
 ├── memoria/                        # Datos de usuarios y sesiones
 ├── logs/                           # Logs de ejecucion
 ├── scripts/                        # Scripts de utilidad (iniciar.ps1)
-├── docs/                           # Documentacion, guias y capturas
 ├── .env.example                    # Template de variables de entorno
 ├── requirements.txt                # Dependencias Python
 ├── run.py                          # Punto de entrada: python run.py
