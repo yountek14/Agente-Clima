@@ -138,6 +138,58 @@ Tambien se puede usar el script PowerShell:
 
 ---
 
+## Solucion de problemas
+
+### `run.py no se reconoce como comando` (PowerShell)
+
+PowerShell no ejecuta `.py` directamente. Usa:
+
+```powershell
+python run.py
+```
+
+### `ModuleNotFoundError: No module named 'agente'`
+
+Asegurate de ejecutar `python run.py` desde la **raiz** del proyecto, no desde `src/`.
+
+### `Falta GITHUB_TOKEN en las variables de entorno`
+
+No creaste el archivo `.env` o no tiene el token. Ejecuta:
+
+```powershell
+copy .env.example .env
+```
+
+Luego edita `.env` y reemplaza `github_pat_TU_TOKEN_AQUI` por tu token real de GitHub.
+
+### `Address already in use` (puerto 5000 ocupado)
+
+Otro proceso ya esta usando el puerto 5000. Cierra la otra instancia o usa otro puerto:
+
+```powershell
+$env:PORT = "8080"
+python run.py
+```
+
+### `No se pudo instalar sentence-transformers`
+
+En Windows puede fallar. Intenta:
+
+```powershell
+pip install sentence-transformers --no-cache-dir
+```
+
+### `No module named 'flask'` o similares
+
+El entorno virtual no esta activado o las dependencias no se instalaron:
+
+```powershell
+.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+---
+
 ## Estructura del Proyecto
 
 ```
