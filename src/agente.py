@@ -136,45 +136,30 @@ class AgenteMeteorologicoSimple:
             if match:
                 wmo_code = int(match.group(1))
                 
-                # Tormenta (95-99)
                 if wmo_code >= 95:
                     return self.assets_clima["tormenta"]
-                # Nieve intensa (75, 86)
                 if wmo_code == 75 or wmo_code == 86:
                     return self.assets_clima["nieve"]
-                # Nieve (71-77, 85-86)
                 if 71 <= wmo_code <= 77 or wmo_code in [85, 86]:
                     return self.assets_clima["nieve"]
-                # Lluvia intensa (65, 67, 82)
                 if wmo_code in [65, 67, 82]:
                     return self.assets_clima["lluvia"]
-                # Lluvia moderada (63, 66, 81)
                 if wmo_code in [63, 66, 81]:
                     return self.assets_clima["lluvia"]
-                # Lluvia debil / chubascos (61, 80)
                 if wmo_code in [61, 80]:
                     return self.assets_clima["lluvia"]
-                # Llovizna (51-57)
                 if 51 <= wmo_code <= 57:
                     return self.assets_clima["llovizna"]
-                # Niebla (45-48)
                 if 45 <= wmo_code <= 48:
                     return self.assets_clima["niebla"]
-                # Nublado (3)
                 if wmo_code == 3:
                     return self.assets_clima["nublado"]
-                # Parcialmente nublado (2)
-                if wmo_code == 2:
+                if wmo_code in [1, 2]:
                     return self.assets_clima["parcialmente_nublado"]
-                # Principalmente despejado (1)
-                if wmo_code == 1:
-                    return self.assets_clima["parcialmente_nublado"]
-                # Despejado (0)
                 return self.assets_clima["despejado"]
         except Exception:
             pass
 
-        # Fallback: analisis de texto si no se encontro WMO
         texto_min = clima_texto.lower()
         if "tormenta" in texto_min or "trueno" in texto_min:
             return self.assets_clima["tormenta"]
@@ -187,12 +172,68 @@ class AgenteMeteorologicoSimple:
         if "nublado" in texto_min or "nubes" in texto_min or "cubierto" in texto_min:
             return self.assets_clima["nublado"]
         
-        # Verificar viento fuerte
         match_viento = re.search(r"Viento:\s*([\d.]+)\s*km/h", clima_texto)
         if match_viento and float(match_viento.group(1)) > 40:
             return self.assets_clima["viento"]
         
         return self.assets_clima["despejado"]
+
+    def _formatear_texto_html(self, texto: str) -> str:
+        """
+        Convierte texto plano generado por la IA en HTML estructurado:
+        - Convierte lineas con bullets (- o •) en <ul><li>
+        - Convierte saltos de linea en <br>
+        - Detecta encabezados con # o lineas que empiezan con emojis
+        - Agrupa items consecutivos en listas
+        """
+        lineas = texto.strip().split('\n')
+        resultado = []
+        en_lista = False
+        
+        for linea in lineas:
+            stripped = linea.strip()
+            if not stripped:
+                if en_lista:
+                    resultado.append('</ul>')
+                    en_lista = False
+                resultado.append('<br>')
+                continue
+            
+            # Detectar items de lista (-, •, *)
+            if re.match(r'^[-•*]\s+', stripped):
+                if not en_lista:
+                    resultado.append('<ul style="margin:8px 0; padding-left:20px;">')
+                    en_lista = True
+                contenido = re.sub(r'^[-•*]\s+', '', stripped)
+                resultado.append(f'<li style="margin-bottom:6px;">{contenido}</li>')
+                continue
+            
+            # Si habia lista activa y esta linea no es item, cerrarla
+            if en_lista:
+                resultado.append('</ul>')
+                en_lista = False
+            
+            # Detectar encabezados (###, ##, #)
+            if re.match(r'^#{1,3}\s+', stripped):
+                nivel = len(re.match(r'^#+', stripped).group())
+                contenido = re.sub(r'^#{1,3}\s+', '', stripped)
+                size = {1: '18px', 2: '16px', 3: '14px'}.get(nivel, '14px')
+                resultado.append(f'<h4 style="margin:12px 0 6px 0; font-size:{size};">{contenido}</h4>')
+                continue
+            
+            # Detectar emoji al inicio como mini-encabezado
+            if re.match(r'^[\U0001F300-\U0001F9FF]', stripped):
+                resultado.append(f'<p style="margin:10px 0 4px 0; font-weight:600;">{stripped}</p>')
+                continue
+            
+            # Linea normal
+            bold_fixed = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', stripped)
+            resultado.append(f'{bold_fixed}<br>')
+        
+        if en_lista:
+            resultado.append('</ul>')
+        
+        return '\n'.join(resultado)
 
     def generar_reporte(
         self, 
@@ -326,22 +367,33 @@ class AgenteMeteorologicoSimple:
                 f"{contexto_temporal}\n\n"
                 f"Tienes dos tareas independientes y debes devolverlas separadas estrictamente por el marcador '[SEPARADOR]'.\n\n"
                 f"Tarea 1:\n"
-                f"Sé breve y directo (máximo 3-4 líneas). Para {nombre_comuna} con {temp_val}°C en {horario}:\n"
-                f"- 1 consejo rápido de vestimenta\n"
-                f"- 1-2 lugares recomendados de esta lista según el clima: {recomendaciones_res}\n"
-                f"Si el viento supera 40 km/h, agrega: ⚠️ Alerta: viento fuerte.\n\n"
+                f"Para {nombre_comuna} con {temp_val}\u00b0C en {horario}, genera recomendaciones ESTRUCTURADAS (SIN emojis, solo texto):\n"
+                f"Vestimenta: 1 consejo breve\n"
+                f"Lugares recomendados (usa bullets -):\n"
+                f"- Nombre del lugar: breve descripcion\n"
+                f"- Nombre del lugar: breve descripcion\n"
+                f"Consejo extra (opcional)\n"
+                f"Si el viento supera 40 km/h, incluye: Alerta: viento fuerte\n"
+                f"Basate en esta lista de lugares: {recomendaciones_res}\n\n"
                 f"[SEPARADOR]\n\n"
                 f"Tarea 2:\n"
-                f"Toma este registro histórico del usuario en crudo: {historial_res}.\n"
-                f"Transfórmalo en un texto limpio, formal e ideal para leer en un correo. Muestra las fechas y desglosa sus métricas correspondientes de forma clara (usa saltos de línea con <br> y puntos con • si corresponde). No dejes rastro de formato JSON, llaves ni contraslas residuales.\n"
+                f"Toma este registro historico del usuario: {historial_res}.\n"
+                f"Transformalo en un resumen ESTRUCTURADO (SIN emojis):\n"
+                f"Fecha: metricas clave (usa bullets -)\n"
+                f"- Temperatura: XX°C | Lluvia: XX mm | Viento: XX km/h\n"
+                f"Mantenlo limpio, sin JSON ni llaves residuales.\n"
             )
         else:
             prompt_formatos = (
                 f"{contexto_temporal}\n\n"
-                f"Sé breve y directo (máximo 3-4 líneas). Para {nombre_comuna} con {temp_val}°C en {horario}:\n"
-                f"- 1 consejo rápido de vestimenta\n"
-                f"- 1-2 lugares recomendados de esta lista según el clima: {recomendaciones_res}\n"
-                f"Si el viento supera 40 km/h, agrega: ⚠️ Alerta: viento fuerte."
+                f"Para {nombre_comuna} con {temp_val}\u00b0C en {horario}, genera recomendaciones ESTRUCTURADAS (SIN emojis, solo texto):\n"
+                f"Vestimenta: 1 consejo breve\n"
+                f"Lugares recomendados (usa bullets -):\n"
+                f"- Nombre del lugar: breve descripcion\n"
+                f"- Nombre del lugar: breve descripcion\n"
+                f"Consejo extra (opcional)\n"
+                f"Si el viento supera 40 km/h, incluye: Alerta: viento fuerte\n"
+                f"Basate en esta lista de lugares: {recomendaciones_res}\n"
             )
 
         # Log del prompt enviado
@@ -383,10 +435,17 @@ class AgenteMeteorologicoSimple:
                 conclusion_ia = contenido_completo
                 historial_formateado = ""
 
-            # Limpiar etiquetas internas que no deben mostrarse al usuario
+            # Limpiar etiquetas internas y emojis residuales
             conclusion_ia = re.sub(r'(?i)Tarea\s*\d+\s*:?\s*', '', conclusion_ia).strip()
+            conclusion_ia = re.sub(r'[\U0001F300-\U0001F9FF\u2600-\u27BF\u2B50\u2702-\u27B0\u24C2-\U0001F251]', '', conclusion_ia).strip()
             if historial_formateado:
                 historial_formateado = re.sub(r'(?i)Tarea\s*\d+\s*:?\s*', '', historial_formateado).strip()
+                historial_formateado = re.sub(r'[\U0001F300-\U0001F9FF\u2600-\u27BF\u2B50\u2702-\u27B0\u24C2-\U0001F251]', '', historial_formateado).strip()
+
+            # Formatear texto plano a HTML estructurado con listas y saltos
+            conclusion_ia = self._formatear_texto_html(conclusion_ia)
+            if historial_formateado:
+                historial_formateado = self._formatear_texto_html(historial_formateado)
 
             # Log para debugging
             logger.info("paso4_conclusion_ia_generada", trace_id=trace_id, 
@@ -409,8 +468,8 @@ class AgenteMeteorologicoSimple:
         # Orden: Condiciones -> Recomendaciones -> Historial (si existe) -> Footer
         seccion_recomendaciones = f"""
                     <h3 style="margin: 0 0 12px 0; color: #2b6cb0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">🧠 Recomendaciones del Agente Inteligente</h3>
-                    <div style="background-color: #ebf8ff; border: 1px solid #bee3f8; padding: 18px; border-radius: 8px; margin-bottom: 25px;">
-                        <p style="margin: 0; line-height: 1.6; font-size: 14px; color: #2b6cb0; font-weight: 500;">{conclusion_ia}</p>
+                    <div style="background-color: #ebf8ff; border: 1px solid #bee3f8; padding: 18px; border-radius: 8px; margin-bottom: 25px; line-height: 1.7; font-size: 14px; color: #2b6cb0;">
+                        {conclusion_ia}
                     </div>
         """
 
@@ -418,8 +477,8 @@ class AgenteMeteorologicoSimple:
         if tiene_historial and historial_formateado:
             seccion_historial = f"""
                     <h3 style="margin: 0 0 12px 0; color: #4a5568; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">📊 Tu Historial Comparativo</h3>
-                    <div style="background-color: #fafbfc; border-left: 4px solid #718096; padding: 15px; margin-bottom: 15px; border-radius: 0 8px 8px 0;">
-                        <p style="margin: 0; line-height: 1.6; font-size: 14px; color: #4a5568;">{historial_formateado}</p>
+                    <div style="background-color: #fafbfc; border-left: 4px solid #718096; padding: 15px; margin-bottom: 15px; border-radius: 0 8px 8px 0; line-height: 1.7; font-size: 14px; color: #4a5568;">
+                        {historial_formateado}
                     </div>
             """
 
