@@ -3,16 +3,25 @@
 venv/
 __pycache__/
 *.pyc
+*.pyo
 
 # Variables de entorno (Secretos)
 .env
+*.env
 
-# Editor
+# Editor / IDE
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# Archivos de datos locales (Historial del agente y usuarios)
+# Logs de ejecucion
+logs/
+
+# Datos generados en runtime (no son parte del codigo fuente)
 datos/historial_reportes.json
-memoria/usuarios.json
+memoria/*.json
 reportes/
 
 # Avatares subidos por usuarios (mantener solo el default)
@@ -21,3 +30,7 @@ static/avatars/*
 
 # Documentos externos
 *.pdf
+
+# Sistema operativo
+Thumbs.db
+Desktop.ini

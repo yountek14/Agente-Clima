@@ -151,6 +151,11 @@ def quienes_somos():
     """Sirve la página informativa del proyecto."""
     return render_template("quienes_somos.html")
 
+@app.route('/stand')
+def stand():
+    """Sirve la página de exhibición para el stand (Summit IA)."""
+    return render_template("stand.html")
+
 
 # ==========================================
 # ENDPOINTS DE LA API (BACKEND)

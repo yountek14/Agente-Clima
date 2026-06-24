@@ -1,144 +1,213 @@
-# AgenteClima - Agente Meteorológico Autónomo
+# AgenteClima - Agente Meteorologico Autonomo
 
-Sistema agente inteligente para generación automatizada de reportes meteorológicos con envío por correo electrónico, construido sobre **LangChain** y **OpenAI (GitHub Models)**.
+Sistema agente inteligente para generacion automatizada de reportes meteorologicos con envio por correo electronico, chatbot conversacional, texto a voz y dashboard de monitoreo. Construido sobre **LangChain**, **Flask** y **GPT-4o (GitHub Models)**.
 
 ---
 
-## Diagrama de Arquitectura
+## Funcionalidades
 
-```mermaid
-graph TB
-    subgraph Usuario
-        A[Solicitud: &quot;Reporte clima para X al correo Y&quot;]
-    end
+| | |
+|---|---|
+| **Chatbot IA** | Conversacion contextualizada con datos climaticos en tiempo real |
+| **Reportes automaticos** | Pipeline de 5 pasos: consulta clima, historial, analisis IA, guardado, envio por email |
+| **Pronostico 7 dias** | Visualizacion por tarjetas con codigos WMO oficiales |
+| **Texto a voz** | Edge TTS para leer respuestas en voz natural (espanol) |
+| **Recomendaciones** | Lugares y actividades sugeridos segun clima, hora y temporada |
+| **Sistema de usuarios** | Registro, login, perfil con avatar, historial personal |
+| **Seguridad multicapa** | Deteccion de inyecciones (8 idiomas), filtro PII, filtro etico, rate limiting |
+| **Dashboard metricas** | Monitoreo en tiempo real de trazas, tokens, costos y requests HTTP |
+| **Stand Summit** | Pagina de exhibicion interactiva en `/stand` |
 
-    subgraph Capa_Orquestacion
-        B[Planificador] --> C[AgenteMeteorologicoSimple]
-        C --> D{Loop de ejecucion}
-        D -->|Paso 1| E[consultar_clima]
-        D -->|Paso 2| F[consultar_historial]
-        D -->|Paso 3| G[LLM: analisis IA]
-        D -->|Paso 4| H[guardar_reporte]
-        D -->|Paso 5| I[enviar_reporte_email]
-    end
+---
 
-    subgraph Capa_Herramientas
-        E --> J[API Open-Meteo]
-        F --> K[datos/historial_reportes.json]
-        H --> K
-        I --> L[SMTP Gmail]
-    end
+## Arquitectura
 
-    subgraph Capa_IA
-        G --> M[ChatOpenAI gpt-4o]
-        M --> N[Prompt formatos + conclusion]
-    end
-
-    A --> B
-    I --> O[Correo electronico destino]
+```
+Usuario (Web/API) --> Flask (app.py) --> Agente LangChain (agente.py)
+                                              |
+                    ┌─────────────────────────┼─────────────────────────┐
+                    │            │            │            │            │
+               Planificar   Clima en     Historial   Analisis IA    Email
+               (5 pasos)    vivo         usuario     (GPT-4o)       (SMTP)
+                            │                         │
+                    Open-Meteo API              GitHub Models
+                    + WeatherAPI (fusion)       (Azure inference)
 ```
 
-## Flujo de Trabajo
+### Pipeline de generacion de reportes
 
-1. **Planificación**: El `Planificador` descompone la solicitud en 5 pasos secuenciados con dependencias
-2. **Consulta climática**: Tool `consultar_clima` obtiene datos en vivo desde Open-Meteo
-3. **Recuperación contextual**: Tool `consultar_historial` lee reportes previos con matching semántico
-4. **Análisis con IA**: El LLM sintetiza datos actuales + históricos y genera recomendaciones
-5. **Persistencia**: Tool `guardar_reporte` almacena el reporte en memoria JSON
-6. **Entrega**: Tool `enviar_reporte_email` envía el HTML formateado por SMTP
+1. **Consulta climatica**: `consultar_clima` obtiene datos en vivo desde Open-Meteo (con fusion opcional WeatherAPI)
+2. **Recuperacion contextual**: `consultar_historial_usuario` lee reportes previos del usuario
+3. **Analisis con IA**: GPT-4o sintetiza datos actuales + historicos + recomendaciones de lugares
+4. **Persistencia**: `guardar_reporte_usuario` almacena el reporte en el historial del usuario
+5. **Entrega**: `enviar_reporte_email` envia el HTML formateado por SMTP
 
-## Justificación de Componentes
+---
 
-| Componente | Framework / Librería | Justificación |
+## Justificacion de Componentes
+
+| Componente | Framework / Libreria | Justificacion |
 |---|---|---|
-| **LLM** | `langchain-openai` + GitHub Models (gpt-4o) | Acceso gratuito a modelos vía token GitHub; compatible con LangChain nativamente |
-| **Framework agente** | `langchain-core` (BaseTool, ChatPromptTemplate, bind_tools) | Abstracciones maduras para definir tools con esquemas Pydantic y function calling |
-| **Memoria persistente** | JSON + sistema de archivos | Sin dependencias externas; los reportes quedan disponibles entre ejecuciones |
-| **Herramienta clima** | Open-Meteo API (gratuita, sin API key) | Datos meteorológicos en tiempo real con código WMO oficial |
-| **Herramienta email** | `smtplib` (stdlib) + Gmail SMTP | Envío directo sin depender de servicios de terceros |
-| **Planificación** | `herramientas/planificador.py` (dataclasses) | Descomposición dinámica de tareas con dependencias y prioridades |
+| **LLM** | `langchain-openai` + GitHub Models (gpt-4o) | Acceso gratuito a modelos via token GitHub; function calling nativo |
+| **Framework agente** | `langchain-core` (BaseTool, ChatPromptTemplate, bind_tools) | Abstracciones maduras para tools con esquemas Pydantic |
+| **Backend web** | Flask + Jinja2 | Servidor liviano, 15+ endpoints REST, plantillas HTML |
+| **Memoria persistente** | JSON + sistema de archivos | Sin dependencias externas; reportes e historial entre sesiones |
+| **Herramienta clima** | Open-Meteo API (gratuita, sin API key) + WeatherAPI (fusion opcional) | Datos en tiempo real con codigo WMO oficial + fuente redundante |
+| **Herramienta email** | `smtplib` (stdlib) + Gmail SMTP | Envio directo sin servicios de terceros |
+| **Texto a voz** | `edge-tts` | TTS gratuito con voz natural en espanol (Microsoft Edge) |
+| **Seguridad** | `sentence-transformers`, `bcrypt`, regex multilenguaje | Deteccion semantica de inyecciones, hashing de passwords, filtros en 8 idiomas |
+| **Planificacion** | `herramientas/planificador.py` (dataclasses) | Descomposicion dinamica de tareas con dependencias y prioridades |
+| **Monitoreo** | `herramientas/monitoreo.py` + `/metricas` | Logging estructurado, trazas, token budget (50K/sesion) |
+
+---
 
 ## Ejemplos de Toma de Decisiones
 
-### 1. Selección visual adaptativa por código WMO
+### 1. Seleccion visual adaptativa por codigo WMO
 ```python
 # En agente.py - obtener_configuracion_visual()
-if wmo_code in [0, 1]:      # Despejado -> icono sol
+if wmo_code in [0, 1]:       # Despejado -> icono sol
     return assets["despejado"]
 elif wmo_code in [2, 3]:     # Nublado -> icono nube
     return assets["nublado"]
 elif wmo_code >= 51:         # Lluvia -> icono lluvia
     return assets["lluvia"]
 ```
-El agente clasifica automáticamente las condiciones actuales usando la clasificación oficial de la Organización Meteorológica Mundial, y adapta el diseño visual del reporte (color de borde, fondo, icono).
 
 ### 2. Alerta de seguridad por viento
-```python
-# En el prompt de análisis IA
-"REGLA CRÍTICA: Si la velocidad del viento supera los 40 km/h, incluye una alerta de seguridad explícita."
-```
-El LLM evalúa esta condición en cada ejecución y adapta sus recomendaciones al usuario.
+El prompt del LLM incluye: "Si la velocidad del viento supera los 40 km/h, incluye una alerta de seguridad explicita."
 
-### 3. Planificación dinámica de pasos
+### 3. Deteccion de inyecciones multi-idioma
 ```python
-# En herramientas/planificador.py
-plan = Planificador().crear_plan(solicitud)
-# Genera 5 pasos secuenciados con dependencias:
-# 1. consultar_clima (prioridad 1, sin deps)
-# 2. consultar_historial (prioridad 1, sin deps)
-# 3. analizar_datos (prioridad 2, deps: paso 1 y 2)
-# 4. guardar_reporte (prioridad 2, deps: paso 3)
-# 5. enviar_reporte_email (prioridad 3, deps: paso 4)
+# Deteccion semantica con sentence-transformers (8 idiomas)
+# + regex para patrones de prompt injection
+# + 3 violaciones = auto-destruccion del agente
 ```
 
-## Configuración y Ejecución
+---
 
-1. Clonar el repositorio
-2. Crear archivo `.env` basado en el siguiente template:
+## Configuracion y Ejecucion
+
+```bash
+# 1. Clonar y entrar al proyecto
+git clone <url-del-repo>
+cd Agente-Clima
+
+# 2. Crear y activar entorno virtual
+python -m venv .venv
+.venv\Scripts\activate     # Windows
+# source .venv/bin/activate  # Linux/Mac
+
+# 3. Instalar dependencias
+pip install -r requirements.txt
+
+# 4. Configurar variables de entorno
+copy .env.example .env     # Windows
+# cp .env.example .env       # Linux/Mac
+# Luego editar .env con tus claves reales
+
+# 5. Ejecutar
+python run.py
+```
+
+El servidor arranca en `http://localhost:5000`.
+
+Variables requeridas en `.env`:
+
 ```env
 OPENAI_BASE_URL="https://models.inference.ai.azure.com"
-GITHUB_TOKEN="tu_token_github"
+GITHUB_TOKEN="github_pat_TU_TOKEN_AQUI"
+OPENAI_API_KEY="github_pat_TU_TOKEN_AQUI"
+
+LANGSMITH_TRACING="true"          # Opcional
+LANGSMITH_API_KEY="lsv2_pt_TU_KEY_AQUI"
+LANGSMITH_PROJECT="agente_meteorologico_ep2"
+
 SMTP_SERVER="smtp.gmail.com"
 SMTP_PORT=587
 EMAIL_REMITENTE="tu_correo@gmail.com"
-EMAIL_PASSWORD="tu_password_app"
+EMAIL_PASSWORD="tu_app_password"
+
+WEATHERAPI_KEY="tu_api_key_aqui"  # Opcional (fallback a Open-Meteo)
 ```
-3. Instalar dependencias: `pip install -r requirements.txt`
-4. Ejecutar: `.\.venv\Scripts\python.exe src\app.py` o `.\scripts\iniciar.ps1`
-5. Abrir: `http://localhost:5000`
+
+Tambien se puede usar el script PowerShell:
+```powershell
+.\scripts\iniciar.ps1
+```
+
+---
 
 ## Estructura del Proyecto
 
 ```
 Agente-Clima/
 ├── src/
-│   ├── app.py                      # Servidor Flask (API + frontend)
-│   ├── agente.py                   # Orquestación principal del agente
-│   └── comunas.py                  # Catálogo de comunas (Los Lagos)
+│   ├── app.py                      # Servidor Flask (API + 20+ endpoints)
+│   ├── agente.py                   # Orquestacion principal del agente
+│   └── comunas.py                  # Catalogo de 15 comunas (Los Lagos)
 ├── herramientas/
 │   ├── clima.py                    # Tool: consulta Open-Meteo API
-│   ├── detector_embedding.py       # Detector semántico de contenido malicioso
-│   ├── email_sender.py             # Tool: envío SMTP
-│   ├── historial.py                # Tools: guardar/consultar historial JSON
-│   ├── monitoreo.py                # Logging, métricas y trazas
-│   ├── planificador.py             # Planificación y descomposición de tareas
-│   ├── recomendaciones.py          # Tool: recomendaciones según clima
-│   └── seguridad.py                # Validación, filtro ético, rate limiting
-├── static/                         # CSS, JS, imágenes del frontend
-├── templates/                      # Plantillas HTML (Jinja2)
-├── datos/                          # Datos JSON persistentes
-├── logs/                           # Logs de ejecución
-├── scripts/                        # Scripts de utilidad
-├── docs/                           # Documentación y recursos
-├── .env                            # Variables de entorno (no versionado)
+│   ├── clima_weatherapi.py         # Tool: consulta WeatherAPI
+│   ├── clima_fusion.py             # Fusion de datos de ambas fuentes
+│   ├── historial.py                # Tool: historial compartido
+│   ├── historial_usuario.py        # Tool: historial por usuario
+│   ├── email_sender.py             # Tool: envio SMTP
+│   ├── recomendaciones.py          # Tool: lugares y actividades segun clima
+│   ├── planificador.py             # Planificacion y descomposicion de tareas
+│   ├── seguridad.py                # Validacion, filtro etico, rate limiting
+│   ├── auth.py                     # Autenticacion y manejo de sesiones
+│   ├── detector_embedding.py       # Detector semantico de inyecciones
+│   └── monitoreo.py                # Logging, metricas y trazas
+├── static/
+│   ├── style.css                   # Estilos Neo-Brutalistas Pastel
+│   ├── chat.js                     # Chatbot interactivo + TTS
+│   ├── pronostico.js               # Panel de pronostico 7 dias
+│   ├── auth.js                     # Login, registro y perfil
+│   └── app-main.js                 # Orquestacion del frontend
+├── templates/
+│   ├── index.html                  # Dashboard principal
+│   ├── historial.html              # Historial de reportes del usuario
+│   ├── perfil.html                 # Editor de perfil
+│   ├── metricas.html               # Dashboard de monitoreo
+│   ├── quienes_somos.html          # Informacion del proyecto
+│   └── stand.html                  # Pagina de exhibicion Summit IA
+├── datos/                          # Datos JSON persistentes (recomendaciones, historial)
+├── memoria/                        # Datos de usuarios y sesiones
+├── logs/                           # Logs de ejecucion
+├── scripts/                        # Scripts de utilidad (iniciar.ps1)
+├── docs/                           # Documentacion, guias y capturas
+├── .env.example                    # Template de variables de entorno
 ├── requirements.txt                # Dependencias Python
+├── run.py                          # Punto de entrada: python run.py
+├── prueba_seguridad.py             # Suite de tests de seguridad (9 categorias)
 └── BITACORA.md                     # Historial completo del proyecto
 ```
 
+---
+
+## Seguridad
+
+El sistema implementa 7 capas de seguridad:
+
+| Capa | Descripcion |
+|---|---|
+| Deteccion de inyecciones | Regex + embeddings semanticos en 8 idiomas (es, en, fr, de, pt, ru, zh, ja) |
+| Filtro PII | Deteccion y redaccion de datos personales (RUT, email, telefono, IP) |
+| Filtro etico | Bloqueo de contenido inapropiado, violento o peligroso |
+| Rate limiting | Maximo 30 requests por 60 segundos por IP |
+| Token budget | Limite de 50K tokens por sesion para control de costos |
+| Passwords | Hashing con bcrypt para todos los usuarios |
+| Auto-destruccion | Bloqueo del agente tras 3 violaciones de seguridad detectadas |
+
+---
+
 ## Referencias
 
-- LangChain Documentation. (2024). *Agents*. https://python.langchain.com/docs/modules/agents/
+- LangChain. (2024). *Agents*. https://python.langchain.com/docs/modules/agents/
 - OpenAI. (2024). *Function Calling Guide*. https://platform.openai.com/docs/guides/function-calling
 - Open-Meteo. (2024). *Weather API*. https://open-meteo.com/en/docs
-- Organización Meteorológica Mundial. (2024). *WMO Weather Codes*. https://www.nodc.noaa.gov/archive/arc0021/0002199/1.1/data/0-data/HTML/WMO-CODE/WMO4677.HTM
-- CrewAI. (2025). *Documentation*. https://docs.crewai.com/
+- WeatherAPI. (2024). *Weather API*. https://www.weatherapi.com/
+- WMO. (2024). *Weather Codes*. https://www.nodc.noaa.gov/archive/arc0021/0002199/1.1/data/0-data/HTML/WMO-CODE/WMO4677.HTM
+- Sentence-Transformers. (2024). *Documentation*. https://www.sbert.net/
+- GitHub Models. (2024). *Marketplace*. https://github.com/marketplace/models
