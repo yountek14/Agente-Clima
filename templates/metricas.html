@@ -6,11 +6,22 @@
     <title>Métricas - Agente Clima</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
     <style>
+        .seccion-metrica {
+            display: none;
+        }
+        .seccion-metrica.activa {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            min-height: 0;
+            flex: 1;
+        }
         .metricas-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 16px;
             padding: 20px;
+            flex-shrink: 0;
         }
         .metrica-card {
             background: #fff;
