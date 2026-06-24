@@ -45,7 +45,8 @@
             justify-content: center;
             font-size: 42px;
         }
-        h1 { font-size: 22px; font-weight: 800; }
+        h1 { font-size: 22px; font-weight: 800; margin-bottom: 2px; }
+        .full-name { font-size: 13px; color: #666; margin-bottom: 10px; }
         .role {
             display: inline-block;
             background: #000;
@@ -54,7 +55,7 @@
             border-radius: 10px;
             font-size: 12px;
             font-weight: 600;
-            margin: 6px 0 14px 0;
+            margin-bottom: 14px;
         }
         .info { text-align: left; margin: 16px 0; }
         .info .row {
@@ -66,8 +67,8 @@
             font-size: 14px;
         }
         .info .row:last-child { border-bottom: none; }
-        .info .icon { font-size: 18px; width: 24px; text-align: center; }
-        .info a { color: #000; text-decoration: none; }
+        .info .icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+        .info a { color: #000; text-decoration: none; word-break: break-all; }
         .btn {
             display: block;
             background: #000;
@@ -94,20 +95,29 @@
     <div class="avatar-placeholder">&#x1F464;</div>
 
     <h1>Benjamin Aguero</h1>
+    <div class="full-name">Benjamin Alejandro Aguero Carrasco</div>
     <div class="role">Desarrollador</div>
 
     <div class="info">
         <div class="row">
             <span class="icon">&#x1F4E7;</span>
-            <span>TU_CORREO@gmail.com</span>
+            <span>Ben.aguero@duocuc.cl</span>
+        </div>
+        <div class="row">
+            <span class="icon">&#x1F4E7;</span>
+            <span>Benjita1b4@gmail.com</span>
+        </div>
+        <div class="row">
+            <span class="icon">&#x1F4DE;</span>
+            <a href="tel:+56965234375">+56 9 6523 4375</a>
         </div>
         <div class="row">
             <span class="icon">&#x1F517;</span>
-            <a href="#" target="_blank">linkedin.com/in/TU_USUARIO</a>
+            <a href="https://cl.linkedin.com/in/benjamin-aguero-carrasco-12907b2ab" target="_blank">linkedin.com/in/benjamin-aguero-carrasco</a>
         </div>
         <div class="row">
-            <span class="icon">&#x1F4BB;</span>
-            <a href="#" target="_blank">github.com/TU_USUARIO</a>
+            <span class="icon">&#x1F4F7;</span>
+            <a href="https://www.instagram.com/elbenjisuwu" target="_blank">@elbenjisuwu</a>
         </div>
         <div class="row">
             <span class="icon">&#x1F393;</span>
