@@ -29,9 +29,9 @@ NOMBRES_MES = {
 def obtener_horario() -> str:
     from zoneinfo import ZoneInfo
     hora = datetime.now(ZoneInfo("America/Santiago")).hour
-    if hora < 12:
-        return "mañana"
-    elif hora < 19:
+    if 6 <= hora < 12:
+        return "ma\u00f1ana"
+    elif 12 <= hora < 19:
         return "tarde"
     return "noche"
 
