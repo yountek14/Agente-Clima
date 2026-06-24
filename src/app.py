@@ -397,24 +397,23 @@ def api_pronostico():
 def fusionar_con_weatherapi(data_open_meteo: dict, comuna: dict, api_key: str) -> dict:
     """
     Fusiona datos de Open-Meteo con WeatherAPI usando estrategia conservadora.
-    Solo fusiona los datos actuales (current), el pronóstico diario se mantiene de Open-Meteo.
+    Fusiona tanto CURRENT como DAILY forecast (hasta 3 dias con WeatherAPI).
     """
-    # Consultar WeatherAPI
-    url = "http://api.weatherapi.com/v1/current.json"
-    params = {
+    # 1. Consultar current de WeatherAPI
+    url_current = "http://api.weatherapi.com/v1/current.json"
+    params_current = {
         "key": api_key,
         "q": f"{comuna['latitud']},{comuna['longitud']}",
         "aqi": "no"
     }
-    
-    response = requests.get(url, params=params, timeout=10)
-    response.raise_for_status()
-    data_wa = response.json()
+    response_current = requests.get(url_current, params=params_current, timeout=10)
+    response_current.raise_for_status()
+    data_wa = response_current.json()
     
     current_wa = data_wa.get("current", {})
     current_om = data_open_meteo.get("current", {})
     
-    # PRECIPITACIÓN: Conservador - si cualquiera reporta lluvia, hay lluvia
+    # PRECIPITACION: Conservador
     precip_om = current_om.get("precipitation") or 0
     precip_wa = current_wa.get("precip_mm") or 0
     precip_final = max(precip_om, precip_wa)
@@ -439,24 +438,12 @@ def fusionar_con_weatherapi(data_open_meteo: dict, comuna: dict, api_key: str) -
     else:
         viento_final = viento_wa
     
-    # CÓDIGO WMO: El más severo
+    # CODIGO WMO: El mas severo
     wmo_om = current_om.get("weather_code") or 0
     wmo_wa = weatherapi_code_to_wmo(current_wa.get("condition", {}).get("code", 1000), current_wa.get("cloud", 0))
-    
-    # Determinar severidad
-    def wmo_severity(code):
-        if code >= 95: return 10
-        elif code >= 71: return 9
-        elif code >= 61: return 8
-        elif code >= 51: return 7
-        elif code >= 45: return 6
-        elif code >= 3: return 5
-        elif code >= 1: return 3
-        else: return 1
-    
     wmo_final = wmo_om if wmo_severity(wmo_om) >= wmo_severity(wmo_wa) else wmo_wa
     
-    # Actualizar datos de Open-Meteo con valores fusionados
+    # Actualizar current con fusion
     data_fusionado = data_open_meteo.copy()
     data_fusionado["current"] = {
         "temperature_2m": temp_final,
@@ -466,9 +453,81 @@ def fusionar_con_weatherapi(data_open_meteo: dict, comuna: dict, api_key: str) -
         "wind_speed_10m": viento_final,
         "weather_code": wmo_final
     }
+    
+    # 2. Consultar forecast de WeatherAPI (3 dias)
+    try:
+        url_forecast = "http://api.weatherapi.com/v1/forecast.json"
+        params_forecast = {
+            "key": api_key,
+            "q": f"{comuna['latitud']},{comuna['longitud']}",
+            "days": 3,
+            "aqi": "no",
+            "alerts": "no"
+        }
+        response_forecast = requests.get(url_forecast, params=params_forecast, timeout=10)
+        response_forecast.raise_for_status()
+        data_fc = response_forecast.json()
+        
+        forecast_days = data_fc.get("forecast", {}).get("forecastday", [])
+        
+        if forecast_days and "daily" in data_fusionado:
+            daily = data_fusionado["daily"]
+            num_om_days = len(daily.get("time", []))
+            
+            for i, fc_day in enumerate(forecast_days):
+                if i >= num_om_days:
+                    break
+                
+                day_data = fc_day.get("day", {})
+                
+                # Temperatura maxima: promedio
+                tmax_om = daily["temperature_2m_max"][i]
+                tmax_wa = day_data.get("maxtemp_c")
+                if tmax_om is not None and tmax_wa is not None:
+                    daily["temperature_2m_max"][i] = round((tmax_om + tmax_wa) / 2, 1)
+                
+                # Temperatura minima: promedio
+                tmin_om = daily["temperature_2m_min"][i]
+                tmin_wa = day_data.get("mintemp_c")
+                if tmin_om is not None and tmin_wa is not None:
+                    daily["temperature_2m_min"][i] = round((tmin_om + tmin_wa) / 2, 1)
+                
+                # Precipitacion: conservador (valor maximo)
+                precip_om = daily.get("precipitation_sum", [0]*num_om_days)[i] or 0
+                precip_wa = day_data.get("totalprecip_mm") or 0
+                if "precipitation_sum" in daily:
+                    daily["precipitation_sum"][i] = max(precip_om, precip_wa)
+                
+                # Probabilidad de precipitacion: conservador
+                prob_om = daily.get("precipitation_probability_max", [0]*num_om_days)[i] or 0
+                prob_wa = day_data.get("daily_chance_of_rain") or 0
+                if "precipitation_probability_max" in daily:
+                    daily["precipitation_probability_max"][i] = max(prob_om, prob_wa)
+                
+                # Codigo WMO: el mas severo
+                wmo_om_day = daily["weather_code"][i]
+                wmo_wa_day = weatherapi_code_to_wmo(day_data.get("condition", {}).get("code", 1000), 50)
+                daily["weather_code"][i] = wmo_om_day if wmo_severity(wmo_om_day) >= wmo_severity(wmo_wa_day) else wmo_wa_day
+            
+            data_fusionado["daily"] = daily
+    
+    except Exception as e:
+        logger.warning("weatherapi_forecast_fusion_error", comuna=comuna.get("nombre", "?"), error=str(e))
+    
     data_fusionado["fusionado"] = True
     
     return data_fusionado
+
+
+def wmo_severity(code):
+    if code >= 95: return 10
+    elif code >= 71: return 9
+    elif code >= 61: return 8
+    elif code >= 51: return 7
+    elif code >= 45: return 6
+    elif code >= 3: return 5
+    elif code >= 1: return 3
+    else: return 1
 
 
 def weatherapi_code_to_wmo(condition_code: int, cloud: int) -> int:

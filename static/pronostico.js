@@ -101,11 +101,17 @@ async function cargarDatosClima(comunaId) {
 
         const data = await respuesta.json();
         renderizarPronosticoSemanal(data.daily);
+        
+        // Mostrar indicador de fusion si corresponde
+        const badgeFusion = document.getElementById('badge-fusion');
+        if (badgeFusion) {
+            badgeFusion.style.display = data.fusionado ? 'inline-block' : 'none';
+        }
     } catch (error) {
         console.error(error);
         const contenedor = document.getElementById('contenedor-pronostico-semanal');
         if (contenedor) {
-            contenedor.innerHTML = "<div class='cargando-placeholder'>⚠️ Error al conectar con Open-Meteo</div>";
+            contenedor.innerHTML = "<div class='cargando-placeholder'>Error al conectar con Open-Meteo</div>";
         }
     }
 }
