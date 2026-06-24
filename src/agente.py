@@ -383,6 +383,11 @@ class AgenteMeteorologicoSimple:
                 conclusion_ia = contenido_completo
                 historial_formateado = ""
 
+            # Limpiar etiquetas internas que no deben mostrarse al usuario
+            conclusion_ia = re.sub(r'(?i)Tarea\s*\d+\s*:?\s*', '', conclusion_ia).strip()
+            if historial_formateado:
+                historial_formateado = re.sub(r'(?i)Tarea\s*\d+\s*:?\s*', '', historial_formateado).strip()
+
             # Log para debugging
             logger.info("paso4_conclusion_ia_generada", trace_id=trace_id, 
                        conclusion_length=len(conclusion_ia), 
@@ -418,6 +423,14 @@ class AgenteMeteorologicoSimple:
                     </div>
             """
 
+        # Limpiar clima_res: eliminar lineas tecnicas (WMO, Nota) para el usuario final
+        lineas_limpias = []
+        for linea in clima_res.split('\n'):
+            if 'WMO' in linea or linea.strip().startswith('Nota:'):
+                continue
+            lineas_limpias.append(linea)
+        clima_res_limpio = '\n'.join(lineas_limpias).replace('- ', '• ').replace('\n', '<br>')
+
         html_template = f"""
         <!DOCTYPE html>
         <html>
@@ -436,7 +449,7 @@ class AgenteMeteorologicoSimple:
                 <div style="padding: 25px;">
                     <h3 style="margin: 0 0 12px 0; color: {diseno['color_borde']}; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">📋 Condiciones en Tiempo Real</h3>
                     <div style="background-color: #fafbfc; border-left: 4px solid {diseno['color_borde']}; padding: 15px; margin-bottom: 25px; border-radius: 0 8px 8px 0;">
-                        <p style="margin: 0; line-height: 1.6; font-size: 15px;">{clima_res.replace('- ', '• ').replace('\n', '<br>')}</p>
+                        <p style="margin: 0; line-height: 1.6; font-size: 15px;">{clima_res_limpio}</p>
                     </div>
 
                     {seccion_recomendaciones}
