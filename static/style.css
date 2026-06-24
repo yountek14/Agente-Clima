@@ -543,7 +543,7 @@ body {
     border: 3px solid #000;
     border-radius: 16px;
     margin-top: 10px;
-    overflow: hidden;
+    overflow: auto;
 }
 
 /* ============ AUTODESTRUCT ============ */
