@@ -356,7 +356,6 @@ async function enviarMensajeChat() {
         historial.appendChild(filaIA);
 
         const iconosDerecha = document.getElementById('iconos-input-derecha');
-        const iconoMicrofono = document.getElementById('icono-microfono');
         const iconoEnviar = document.getElementById('icono-enviar');
 
         const btnDetener = document.createElement('span');
@@ -364,8 +363,7 @@ async function enviarMensajeChat() {
         btnDetener.title = "Detener respuesta";
         btnDetener.textContent = "✕";
 
-        if (iconosDerecha && iconoMicrofono && iconoEnviar) {
-            iconoMicrofono.style.display = 'none';
+        if (iconosDerecha && iconoEnviar) {
             iconoEnviar.style.display = 'none';
             iconosDerecha.appendChild(btnDetener);
         }
@@ -425,9 +423,7 @@ async function enviarMensajeChat() {
         generandoRespuesta = false;
         const btnDetener = document.querySelector('.btn-detener-generacion');
         if (btnDetener && btnDetener.parentNode) btnDetener.remove();
-        const iconoMicrofono = document.getElementById('icono-microfono');
         const iconoEnviar = document.getElementById('icono-enviar');
-        if (iconoMicrofono) iconoMicrofono.style.display = '';
         if (iconoEnviar) iconoEnviar.style.display = '';
         inputElement.disabled = false;
         inputElement.focus();
