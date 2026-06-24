@@ -17,8 +17,8 @@ def parse_clima_response(respuesta: str) -> Dict:
     if match:
         datos['temperatura'] = float(match.group(1))
     
-    # Extraer precipitación
-    match = re.search(r"Precipitación:\s*([\d.]+)\s*mm", respuesta)
+    # Extraer precipitacion (soporta "Precipitación total:", "Precipitación:", "Lluvia:")
+    match = re.search(r"(?:Precipitaci[oó]n\s*(?:total)?|Lluvia):\s*([\d.]+)\s*mm", respuesta)
     if match:
         datos['precipitacion'] = float(match.group(1))
     
@@ -27,8 +27,8 @@ def parse_clima_response(respuesta: str) -> Dict:
     if match:
         datos['viento'] = float(match.group(1))
     
-    # Extraer código WMO
-    match = re.search(r"Código WMO:\s*(\d+)", respuesta)
+    # Extraer código WMO (soporta formatos: "Código del Clima (WMO): X", "Código WMO aproximado: X", "Código WMO: X")
+    match = re.search(r"WMO.*?(\d+)", respuesta)
     if match:
         datos['wmo_code'] = int(match.group(1))
     
