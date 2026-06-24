@@ -40,6 +40,9 @@ body {
     flex-direction: column;
     gap: 20px;
     color: #FFFFFF;
+    min-width: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .logo-img {
@@ -53,6 +56,9 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
 }
 
 .item-link {
@@ -88,6 +94,7 @@ body {
     position: relative;
     margin: 0 12px;
     min-height: 0;
+    min-width: 0;
 }
 
 /* Pestañas */
@@ -120,19 +127,34 @@ body {
 }
 
 /* Barra de scroll personalizada y delgada para el chat */
-.scroll-burbujas-chat::-webkit-scrollbar {
-    width: 8px;
+.scroll-burbujas-chat::-webkit-scrollbar,
+.menu-lateral-negro::-webkit-scrollbar,
+.panel-clima-derecho::-webkit-scrollbar,
+.grilla-dias-manga::-webkit-scrollbar,
+.enlaces-menu::-webkit-scrollbar {
+    width: 6px;
 }
-.scroll-burbujas-chat::-webkit-scrollbar-track {
+.scroll-burbujas-chat::-webkit-scrollbar-track,
+.menu-lateral-negro::-webkit-scrollbar-track,
+.panel-clima-derecho::-webkit-scrollbar-track,
+.grilla-dias-manga::-webkit-scrollbar-track,
+.enlaces-menu::-webkit-scrollbar-track {
     background: transparent;
 }
-.scroll-burbujas-chat::-webkit-scrollbar-thumb {
-    background: #FFFFFF;
+.scroll-burbujas-chat::-webkit-scrollbar-thumb,
+.menu-lateral-negro::-webkit-scrollbar-thumb,
+.panel-clima-derecho::-webkit-scrollbar-thumb,
+.grilla-dias-manga::-webkit-scrollbar-thumb,
+.enlaces-menu::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.15);
     border-radius: 10px;
-    border: 1px solid #E7E3D8;
 }
-.scroll-burbujas-chat::-webkit-scrollbar-thumb:hover {
-    background: #f0f0f0;
+.scroll-burbujas-chat::-webkit-scrollbar-thumb:hover,
+.menu-lateral-negro::-webkit-scrollbar-thumb:hover,
+.panel-clima-derecho::-webkit-scrollbar-thumb:hover,
+.grilla-dias-manga::-webkit-scrollbar-thumb:hover,
+.enlaces-menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.3);
 }
 
 /* Pantalla de bienvenida */
@@ -143,15 +165,21 @@ body {
     justify-content: center;
     flex: 1;
     gap: 15px;
+    min-height: 0;
+    overflow: hidden;
 }
 .sol-logo-grande {
     width: 90px;
+    max-width: 100%;
     height: auto;
     animation: bounce 3s infinite ease-in-out;
 }
 .bienvenida-ia-bloque h1 {
-    font-size: 30px;
+    font-size: clamp(20px, 4vw, 30px);
     color: #000000;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ============ MENSAJES DEL CHAT CON AVATAR ============ */
@@ -327,7 +355,9 @@ body {
     padding: 6px 0 6px 14px;
     border-left: 4px solid #7E7E7E;
     min-height: 0;
+    min-width: 0;
     overflow-x: hidden;
+    overflow-y: auto;
 }
 .panel-clima-derecho h3 {
     font-size: 16px;
