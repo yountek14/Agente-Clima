@@ -64,15 +64,19 @@ Usuario (Web/API) --> Flask (app.py) --> Agente LangChain (agente.py)
 ## Ejemplos de Toma de Decisiones
 
 ### 1. Seleccion visual adaptativa por codigo WMO
-```python
-# En agente.py - obtener_configuracion_visual()
-if wmo_code in [0, 1]:       # Despejado -> icono sol
-    return assets["despejado"]
-elif wmo_code in [2, 3]:     # Nublado -> icono nube
-    return assets["nublado"]
-elif wmo_code >= 51:         # Lluvia -> icono lluvia
-    return assets["lluvia"]
-```
+El reporte HTML adapta su emoji, color de borde y fondo segun el codigo WMO. Se priorizan condiciones severas:
+
+| WMO | Condicion | Emoji |
+|---|---|---|
+| 0 | Despejado | ☀️ |
+| 1-2 | Parcialmente nublado | ⛅ |
+| 3 | Nublado | ☁️ |
+| 45-48 | Niebla | 🌫️ |
+| 51-57 | Llovizna | 🌦️ |
+| 61-82 | Lluvia | 🌧️ |
+| 71-86 | Nieve | 🌨️ |
+| 95-99 | Tormenta | ⛈️ |
+| viento >40km/h | Ventoso | 💨 |
 
 ### 2. Alerta de seguridad por viento
 El prompt del LLM incluye: "Si la velocidad del viento supera los 40 km/h, incluye una alerta de seguridad explicita."
